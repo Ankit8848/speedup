@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "SpeedUp – Drone Delivery"
+version = "1.0.0"
+id = "artifacts/speedup"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22798
+
+[services.development]
+run = "pnpm --filter @workspace/speedup run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/speedup", "run", "build" ]
+publicDir = "artifacts/speedup/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22798"
+BASE_PATH = "/"

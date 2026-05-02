@@ -16,6 +16,27 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 
+## Artifacts
+
+### SpeedUp – Drone Delivery (`artifacts/speedup`)
+- **Kind**: react-vite web app
+- **Preview path**: `/` (root)
+- **Description**: Premium, futuristic 3D landing page for SpeedUp drone delivery company
+- **Sections**: Hero, How It Works, Technology, Use Cases, Stats, Simulation, Vision, Final CTA
+- **Tech**: React Three Fiber, GSAP + ScrollTrigger, Framer Motion, Three.js, Tailwind CSS
+- **Features**:
+  - 3D drone built from geometric primitives (WebGL when available, CSS fallback otherwise)
+  - Scroll-triggered animations via GSAP ScrollTrigger
+  - Animated stat counters, glassmorphism cards, neon glow effects
+  - Interactive delivery simulation with animated SVG path
+  - Custom CSS cursor, day/night mode toggle
+  - Dark futuristic palette: deep black + neon cyan (#00D4FF) + purple (#7B2FFF)
+  - Google Fonts: Space Grotesk (headings) + Inter (body)
+
+### API Server (`artifacts/api-server`)
+- **Kind**: api (Express 5)
+- **Preview path**: `/api`
+
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages
