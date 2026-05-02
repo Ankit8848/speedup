@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, useMap, Circle, Polyline, Marker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Package, Clock, Plane, Navigation2, Activity, Radio, Zap } from "lucide-react";
+import { Package, Clock, Plane, Navigation2, Activity, Radio, Zap, Battery, Signal, MapPin } from "lucide-react";
 
 /* ─── Fix Leaflet default icon paths in bundlers ─── */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,6 +70,36 @@ const CITIES = [
   },
 ];
 
+/* ─── Flight phases ─── */
+type FlightPhase = "idle" | "launching" | "enroute" | "approaching" | "landing" | "delivered";
+
+function getPhase(t: number): FlightPhase {
+  if (t <= 0) return "idle";
+  if (t < 0.08) return "launching";
+  if (t < 0.82) return "enroute";
+  if (t < 0.93) return "approaching";
+  if (t < 1) return "landing";
+  return "delivered";
+}
+
+const PHASE_LABEL: Record<FlightPhase, string> = {
+  idle: "STANDBY",
+  launching: "LAUNCHING",
+  enroute: "EN ROUTE",
+  approaching: "APPROACHING LZ",
+  landing: "LANDING",
+  delivered: "DELIVERED ✓",
+};
+
+const PHASE_COLOR: Record<FlightPhase, string> = {
+  idle: "rgba(255,255,255,0.3)",
+  launching: "#FFB020",
+  enroute: "#FF5500",
+  approaching: "#FF5500",
+  landing: "#FFB020",
+  delivered: "#4ADE80",
+};
+
 /* ─── Helpers ─── */
 const statusColor = (s: string) =>
   s === "Active" ? "#FF5500" : s === "Pilot" ? "#3B82F6" : "rgba(255,255,255,0.3)";
@@ -77,51 +107,159 @@ const statusColor = (s: string) =>
 const statusBg = (s: string) =>
   s === "Active" ? "rgba(255,85,0,0.15)" : s === "Pilot" ? "rgba(59,130,246,0.15)" : "rgba(255,255,255,0.05)";
 
-function lerpLatLng(a: [number, number], b: [number, number], t: number): [number, number] {
-  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+/** Quadratic bezier interpolation */
+function bezierPoint(
+  start: [number, number],
+  ctrl: [number, number],
+  end: [number, number],
+  t: number
+): [number, number] {
+  const mt = 1 - t;
+  return [
+    mt * mt * start[0] + 2 * mt * t * ctrl[0] + t * t * end[0],
+    mt * mt * start[1] + 2 * mt * t * ctrl[1] + t * t * end[1],
+  ];
+}
+
+/** Compute bezier control point (curves away from straight line) */
+function bezierCtrl(start: [number, number], end: [number, number]): [number, number] {
+  const midLat = (start[0] + end[0]) / 2;
+  const midLng = (start[1] + end[1]) / 2;
+  const dLat = end[0] - start[0];
+  const dLng = end[1] - start[1];
+  const dist = Math.sqrt(dLat * dLat + dLng * dLng);
+  const curve = dist * 0.5;
+  return [
+    midLat - (dLng / dist) * curve,
+    midLng + (dLat / dist) * curve,
+  ];
+}
+
+/** Build bezier path as array of lat/lng points */
+function buildBezierPath(
+  hub: [number, number],
+  dest: [number, number],
+  steps = 60
+): [number, number][] {
+  const ctrl = bezierCtrl(hub, dest);
+  return Array.from({ length: steps + 1 }, (_, i) => bezierPoint(hub, ctrl, dest, i / steps));
+}
+
+/** Simulated telemetry values based on phase */
+function telemetry(t: number) {
+  const phase = getPhase(t);
+  let alt = 0, speed = 0;
+  if (phase === "launching") { alt = Math.round(t / 0.08 * 120); speed = Math.round(t / 0.08 * 45); }
+  else if (phase === "enroute") { alt = 120 + Math.round(Math.sin(t * 40) * 5); speed = 88 + Math.round(Math.sin(t * 25) * 4); }
+  else if (phase === "approaching") { alt = Math.round(120 * (1 - (t - 0.82) / 0.11)); speed = Math.round(88 * (1 - (t - 0.82) / 0.11 * 0.6)); }
+  else if (phase === "landing") { alt = Math.round(30 * (1 - (t - 0.93) / 0.07)); speed = Math.round(12 * (1 - (t - 0.93) / 0.07)); }
+  const eta = Math.max(0, Math.round((1 - t) * 420)); // seconds
+  return { alt, speed, eta };
 }
 
 function randomDest(city: (typeof CITIES)[0]): [number, number] {
-  const r = 0.015 + Math.random() * 0.02;
+  const r = 0.018 + Math.random() * 0.022;
   const angle = Math.random() * Math.PI * 2;
   return [city.latlng[0] + r * Math.cos(angle), city.latlng[1] + r * Math.sin(angle)];
+}
+
+function randomDroneId() {
+  return "SU-" + Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
 /* ─── Icons ─── */
 function makeHubIcon(color: string): L.DivIcon {
   return L.divIcon({
     className: "",
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    html: `<div style="position:relative;width:24px;height:24px;">
-      <div style="position:absolute;inset:7px;border-radius:50%;background:${color};box-shadow:0 0 10px ${color},0 0 20px ${color}80;z-index:2;"></div>
-      <div class="hub-ring" style="position:absolute;inset:1px;border-radius:50%;border:1.5px solid ${color};"></div>
-      <div class="hub-ring-outer" style="position:absolute;inset:-8px;border-radius:50%;border:1px solid ${color};"></div>
-    </div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    html: `
+      <div style="position:relative;width:28px;height:28px;">
+        <div style="position:absolute;inset:9px;border-radius:50%;background:${color};box-shadow:0 0 12px ${color},0 0 24px ${color}70;z-index:2;"></div>
+        <div class="hub-ring" style="position:absolute;inset:2px;border-radius:50%;border:1.5px solid ${color};"></div>
+        <div class="hub-ring-outer" style="position:absolute;inset:-9px;border-radius:50%;border:1px solid ${color};"></div>
+      </div>`,
   });
 }
 
-const DRONE_ICON = L.divIcon({
-  className: "",
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
-  html: `<div class="drone-icon" style="width:36px;height:36px;filter:drop-shadow(0 0 8px #FF5500) drop-shadow(0 0 16px #FF550080);">
-    <svg viewBox="0 0 36 36" fill="none" width="36" height="36">
-      <circle cx="18" cy="18" r="5" fill="#FF5500"/>
-      <circle cx="18" cy="18" r="3" fill="white"/>
-      <line x1="18" y1="18" x2="8" y2="8" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="18" y1="18" x2="28" y2="8" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="18" y1="18" x2="8" y2="28" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="18" y1="18" x2="28" y2="28" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="8" cy="8" r="3.5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
-      <circle cx="28" cy="8" r="3.5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
-      <circle cx="8" cy="28" r="3.5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
-      <circle cx="28" cy="28" r="3.5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
-    </svg>
-  </div>`,
-});
+function makeDroneIcon(phase: FlightPhase): L.DivIcon {
+  const glow = phase === "delivered" ? "#4ADE80" : "#FF5500";
+  const scale = phase === "landing" || phase === "delivered" ? 0.8 : 1;
+  return L.divIcon({
+    className: "",
+    iconSize: [56, 56],
+    iconAnchor: [28, 28],
+    html: `
+      <div class="map-drone" style="
+        width:56px;height:56px;
+        transform:scale(${scale});
+        transition:transform 0.5s ease;
+        filter:drop-shadow(0 0 8px ${glow}) drop-shadow(0 0 20px ${glow}60);
+      ">
+        <svg viewBox="0 0 56 56" width="56" height="56" fill="none" style="overflow:visible;">
+          <!-- Arms -->
+          <line x1="28" y1="28" x2="11" y2="11" stroke="${glow}" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+          <line x1="28" y1="28" x2="45" y2="11" stroke="${glow}" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+          <line x1="28" y1="28" x2="11" y2="45" stroke="${glow}" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+          <line x1="28" y1="28" x2="45" y2="45" stroke="${glow}" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+          <!-- Rotor housings -->
+          <circle cx="11" cy="11" r="9" fill="${glow}10" stroke="${glow}" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="45" cy="11" r="9" fill="${glow}10" stroke="${glow}" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="11" cy="45" r="9" fill="${glow}10" stroke="${glow}" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="45" cy="45" r="9" fill="${glow}10" stroke="${glow}" stroke-width="1.2" opacity="0.6"/>
+          <!-- Spinning blades TL (CW) -->
+          <g class="rotor-cw" style="transform-box:fill-box;transform-origin:11px 11px;">
+            <line x1="4" y1="11" x2="18" y2="11" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="11" y1="4" x2="11" y2="18" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <!-- Spinning blades TR (CCW) -->
+          <g class="rotor-ccw" style="transform-box:fill-box;transform-origin:45px 11px;">
+            <line x1="38" y1="11" x2="52" y2="11" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="45" y1="4" x2="45" y2="18" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <!-- Spinning blades BL (CCW) -->
+          <g class="rotor-ccw" style="transform-box:fill-box;transform-origin:11px 45px;">
+            <line x1="4" y1="45" x2="18" y2="45" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="11" y1="38" x2="11" y2="52" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <!-- Spinning blades BR (CW) -->
+          <g class="rotor-cw" style="transform-box:fill-box;transform-origin:45px 45px;">
+            <line x1="38" y1="45" x2="52" y2="45" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="45" y1="38" x2="45" y2="52" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <!-- Body hexagon -->
+          <polygon points="28,20 34,24 34,32 28,36 22,32 22,24" fill="${glow}" opacity="0.95"/>
+          <!-- Camera dome -->
+          <circle cx="28" cy="28" r="5" fill="#010b19" opacity="0.9"/>
+          <circle cx="28" cy="28" r="3" fill="${glow}" opacity="0.7"/>
+          <circle cx="28" cy="28" r="1.2" fill="white"/>
+        </svg>
+      </div>`,
+  });
+}
 
-/* ─── Inner map components (must be inside MapContainer) ─── */
+function makeDestIcon(): L.DivIcon {
+  return L.divIcon({
+    className: "",
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
+    html: `
+      <div style="position:relative;width:48px;height:48px;">
+        <div class="dest-ring-1" style="position:absolute;inset:4px;border-radius:50%;border:2px solid #4ADE80;opacity:0.8;"></div>
+        <div class="dest-ring-2" style="position:absolute;inset:-4px;border-radius:50%;border:1px solid #4ADE80;opacity:0.4;"></div>
+        <div style="position:absolute;inset:20px;border-radius:50%;background:#4ADE80;box-shadow:0 0 12px #4ADE80;"></div>
+        <div style="
+          position:absolute;inset:0;
+          display:flex;align-items:center;justify-content:center;
+          font-size:9px;font-weight:900;color:#4ADE80;
+          font-family:'Space Grotesk',sans-serif;letter-spacing:0.05em;
+          padding-top:28px;
+        ">LZ</div>
+      </div>`,
+  });
+}
+
+/* ─── Inner map components ─── */
 
 function FlyController({ city, onDone }: { city: (typeof CITIES)[0]; onDone: () => void }) {
   const map = useMap();
@@ -148,8 +286,8 @@ function DeliveryZones() {
             <Circle center={city.latlng} radius={r}
               pathOptions={{ color: c, weight: 0, fillColor: c, fillOpacity: 0.03 }} />
             <Circle center={city.latlng} radius={r * 0.85}
-              pathOptions={{ color: c, weight: 1.5, opacity: 0.45, dashArray: "6 4", fillColor: c, fillOpacity: 0.05 }} />
-            <Circle center={city.latlng} radius={r * 0.55}
+              pathOptions={{ color: c, weight: 1.5, opacity: 0.4, dashArray: "6 4", fillColor: c, fillOpacity: 0.05 }} />
+            <Circle center={city.latlng} radius={r * 0.52}
               pathOptions={{ color: c, weight: 0, fillColor: c, fillOpacity: 0.04 }} />
           </React.Fragment>
         );
@@ -174,35 +312,61 @@ function HubMarkers({ onCityClick }: { onCityClick: (id: string) => void }) {
 }
 
 interface DroneProps {
-  active: boolean;
   hub: [number, number];
   dest: [number, number];
-  onProgress: (p: number) => void;
+  onProgress: (t: number) => void;
+  onPhaseChange: (p: FlightPhase) => void;
   onComplete: () => void;
+  running: boolean;
 }
 
-function DroneLayer({ active, hub, dest, onProgress, onComplete }: DroneProps) {
+function DroneLayer({ hub, dest, onProgress, onPhaseChange, onComplete, running }: DroneProps) {
+  const map = useMap();
   const [pos, setPos] = useState<[number, number]>(hub);
+  const [phase, setPhase] = useState<FlightPhase>("launching");
+  const [trailPts, setTrailPts] = useState<[number, number][]>([hub]);
   const frameRef = useRef<number | null>(null);
   const tRef = useRef(0);
   const doneRef = useRef(false);
+  const lastPanRef = useRef(0);
+
+  const path = useMemo(() => buildBezierPath(hub, dest), [hub, dest]);
+  const ctrl = useMemo(() => bezierCtrl(hub, dest), [hub, dest]);
 
   useEffect(() => {
-    if (!active) return;
+    if (!running) return;
     tRef.current = 0;
     doneRef.current = false;
     setPos(hub);
+    setTrailPts([hub]);
+    setPhase("launching");
 
     const tick = () => {
       if (doneRef.current) return;
-      tRef.current = Math.min(tRef.current + 0.0045, 1);
-      const newPos = lerpLatLng(hub, dest, tRef.current);
+      tRef.current = Math.min(tRef.current + 0.003, 1);
+      const t = tRef.current;
+      const newPos = bezierPoint(hub, ctrl, dest, t);
+      const newPhase = getPhase(t);
+
       setPos(newPos);
-      onProgress(Math.round(tRef.current * 100));
-      if (tRef.current < 1) {
+      setPhase(newPhase);
+      setTrailPts(prev => [...prev.slice(-80), newPos]);
+      onProgress(t);
+      onPhaseChange(newPhase);
+
+      /* Pan map to follow drone (every 30 frames) */
+      const now = Date.now();
+      if (now - lastPanRef.current > 800 && newPhase === "enroute") {
+        map.panTo(newPos, { animate: true, duration: 0.8 });
+        lastPanRef.current = now;
+      }
+
+      if (t < 1) {
         frameRef.current = requestAnimationFrame(tick);
       } else {
         doneRef.current = true;
+        setPhase("delivered");
+        onPhaseChange("delivered");
         onComplete();
       }
     };
@@ -211,16 +375,148 @@ function DroneLayer({ active, hub, dest, onProgress, onComplete }: DroneProps) {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
       doneRef.current = true;
     };
-  }, [active, hub, dest]);
+  }, [running, hub, dest]);
 
   return (
     <>
-      <Polyline positions={[hub, dest]}
-        pathOptions={{ color: "#FF5500", weight: 1.5, opacity: 0.25, dashArray: "6 5" }} />
-      <Polyline positions={[hub, pos]}
-        pathOptions={{ color: "#FF5500", weight: 2.5, opacity: 0.75 }} />
-      <Marker position={pos} icon={DRONE_ICON} zIndexOffset={1000} />
+      {/* Full planned route (dashed) */}
+      <Polyline
+        positions={path}
+        pathOptions={{ color: "#FF5500", weight: 1, opacity: 0.18, dashArray: "5 6" }}
+      />
+      {/* Live trail */}
+      {trailPts.length > 1 && (
+        <Polyline
+          positions={trailPts}
+          pathOptions={{ color: "#FF5500", weight: 3, opacity: 0.8 }}
+        />
+      )}
+      {/* Drone marker */}
+      <Marker position={pos} icon={makeDroneIcon(phase)} zIndexOffset={2000} />
+      {/* Destination LZ */}
+      <Marker position={dest} icon={makeDestIcon()} zIndexOffset={1500} />
     </>
+  );
+}
+
+/* ─── HUD subcomponent ─── */
+function DeliveryHUD({
+  phase, progress, droneId,
+  alt, speed, eta,
+  hub, dest,
+}: {
+  phase: FlightPhase; progress: number; droneId: string;
+  alt: number; speed: number; eta: number;
+  hub: [number, number]; dest: [number, number];
+}) {
+  const etaMin = Math.floor(eta / 60);
+  const etaSec = eta % 60;
+  const phaseColor = PHASE_COLOR[phase];
+  const isDelivered = phase === "delivered";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 12, scale: 0.97 }}
+      transition={{ duration: 0.3 }}
+      className="absolute bottom-4 left-4 z-[800] rounded-2xl overflow-hidden"
+      style={{
+        background: "rgba(1, 8, 18, 0.93)",
+        border: `1px solid ${phaseColor}40`,
+        backdropFilter: "blur(20px)",
+        minWidth: "240px",
+        boxShadow: `0 8px 32px rgba(0,0,0,0.5), inset 0 0 30px rgba(255,85,0,0.03)`,
+      }}
+    >
+      {/* Top accent bar */}
+      <div className="h-0.5 w-full" style={{ background: `linear-gradient(90deg, ${phaseColor}, transparent)` }} />
+
+      <div className="p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full"
+              style={{ background: phaseColor, boxShadow: `0 0 6px ${phaseColor}`, animation: !isDelivered ? "hudPulse 1s ease-in-out infinite" : "none" }} />
+            <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: phaseColor }}>
+              {PHASE_LABEL[phase]}
+            </span>
+          </div>
+          <span className="text-[9px] font-bold tracking-wider" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
+            {droneId}
+          </span>
+        </div>
+
+        {/* Telemetry row */}
+        {!isDelivered ? (
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {[
+              { label: "ALT", value: `${alt}m`, icon: "↑" },
+              { label: "SPEED", value: `${speed}km/h`, icon: "⚡" },
+              { label: "ETA", value: `${etaMin}:${String(etaSec).padStart(2, "0")}`, icon: "⏱" },
+            ].map(item => (
+              <div key={item.label} className="rounded-lg p-2 text-center"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="text-[8px] mb-1" style={{ color: "rgba(255,255,255,0.25)" }}>{item.label}</div>
+                <div className="text-[11px] font-black" style={{ color: "white", fontFamily: "monospace" }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-2 mb-3 py-2 rounded-lg"
+            style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)" }}>
+            <span className="text-lg">📦</span>
+            <span className="text-[11px] font-black" style={{ color: "#4ADE80" }}>Package Delivered!</span>
+          </div>
+        )}
+
+        {/* Progress bar */}
+        <div className="mb-2">
+          <div className="h-1.5 rounded-full overflow-hidden"
+            style={{ background: "rgba(255,255,255,0.06)" }}>
+            <motion.div
+              className="h-full rounded-full"
+              animate={{ width: `${Math.round(progress * 100)}%` }}
+              transition={{ duration: 0.15 }}
+              style={{ background: isDelivered ? "#4ADE80" : `linear-gradient(90deg, ${phaseColor}80, ${phaseColor})` }}
+            />
+          </div>
+        </div>
+
+        {/* Route labels */}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#FF5500" }} />
+            <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.2)" }}>Hub</span>
+          </div>
+          <div className="text-[8px] font-bold" style={{ color: "rgba(255,255,255,0.15)", fontFamily: "monospace" }}>
+            {Math.round(progress * 100)}%
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.2)" }}>Drop Zone</span>
+            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#4ADE80" }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Coordinates footer */}
+      <div className="px-4 pb-3">
+        <div className="flex items-center justify-between pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+          <div className="flex items-center gap-3">
+            <Battery className="w-2.5 h-2.5" style={{ color: "rgba(255,255,255,0.2)" }} />
+            <span className="text-[8px] font-bold" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>94%</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="rounded-sm" style={{ width: 3, height: i * 2 + 2, background: i <= 3 ? "#FF5500" : "rgba(255,255,255,0.1)" }} />
+            ))}
+          </div>
+          <span className="text-[8px] font-bold" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
+            {dest[0].toFixed(4)}, {dest[1].toFixed(4)}
+          </span>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -228,10 +524,14 @@ function DroneLayer({ active, hub, dest, onProgress, onComplete }: DroneProps) {
 export function LocationsSection() {
   const [selected, setSelected] = useState("orlando");
   const [isFlying, setIsFlying] = useState(false);
-  const [droneActive, setDroneActive] = useState(false);
+  const [droneRunning, setDroneRunning] = useState(false);
+  const [showDrone, setShowDrone] = useState(false);
   const [droneDest, setDroneDest] = useState<[number, number] | null>(null);
   const [droneProgress, setDroneProgress] = useState(0);
-  const [showDrone, setShowDrone] = useState(false);
+  const [dronePhase, setDronePhase] = useState<FlightPhase>("idle");
+  const [droneId] = useState(randomDroneId);
+  const [tel, setTel] = useState({ alt: 0, speed: 0, eta: 0 });
+  const [showBurst, setShowBurst] = useState(false);
 
   const active = CITIES.find(c => c.id === selected)!;
 
@@ -239,28 +539,43 @@ export function LocationsSection() {
     if (id === selected) return;
     setSelected(id);
     setIsFlying(true);
-    setDroneActive(false);
+    setDroneRunning(false);
     setShowDrone(false);
     setDroneDest(null);
     setDroneProgress(0);
+    setDronePhase("idle");
   }, [selected]);
 
+  const handleProgress = useCallback((t: number) => {
+    setDroneProgress(t);
+    setTel(telemetry(t));
+  }, []);
+
+  const handlePhaseChange = useCallback((p: FlightPhase) => {
+    setDronePhase(p);
+  }, []);
+
   const launchDrone = useCallback(() => {
-    if (droneActive || isFlying) return;
+    if (droneRunning || isFlying) return;
     const dest = randomDest(active);
     setDroneDest(dest);
-    setDroneActive(true);
     setShowDrone(true);
+    setDroneRunning(true);
     setDroneProgress(0);
-  }, [active, droneActive, isFlying]);
+    setDronePhase("launching");
+    setShowBurst(false);
+  }, [active, droneRunning, isFlying]);
 
   const handleDroneComplete = useCallback(() => {
-    setDroneActive(false);
+    setDroneRunning(false);
+    setShowBurst(true);
     setTimeout(() => {
       setShowDrone(false);
       setDroneDest(null);
       setDroneProgress(0);
-    }, 2500);
+      setDronePhase("idle");
+      setShowBurst(false);
+    }, 4000);
   }, []);
 
   return (
@@ -268,54 +583,55 @@ export function LocationsSection() {
       style={{ background: "#010b19", padding: "9rem 0" }}>
 
       <style>{`
+        /* ── Leaflet overrides ── */
         .leaflet-container { background: #010b19 !important; }
         .leaflet-control-attribution { display: none !important; }
         .leaflet-control-zoom {
-          border: 1px solid rgba(255,255,255,0.1) !important;
+          border: 1px solid rgba(255,255,255,0.09) !important;
           border-radius: 12px !important;
           overflow: hidden;
-          background: rgba(1,11,25,0.85) !important;
+          background: rgba(1,8,18,0.88) !important;
           backdrop-filter: blur(12px);
           box-shadow: none !important;
         }
         .leaflet-control-zoom a {
           background: transparent !important;
-          color: rgba(255,255,255,0.45) !important;
-          border-color: rgba(255,255,255,0.08) !important;
-          width: 32px !important;
-          height: 32px !important;
-          line-height: 32px !important;
+          color: rgba(255,255,255,0.4) !important;
+          border-color: rgba(255,255,255,0.07) !important;
+          width: 32px !important; height: 32px !important; line-height: 32px !important;
         }
-        .leaflet-control-zoom a:hover {
-          background: rgba(255,85,0,0.15) !important;
-          color: #FF5500 !important;
-        }
+        .leaflet-control-zoom a:hover { background: rgba(255,85,0,0.14) !important; color: #FF5500 !important; }
+
+        /* ── Hub animations ── */
         .hub-ring { animation: hubRingPulse 2s ease-out infinite; }
         .hub-ring-outer { animation: hubRingPulse 2s ease-out infinite 0.65s; }
         @keyframes hubRingPulse {
-          0% { opacity: 0.6; transform: scale(0.85); }
-          100% { opacity: 0; transform: scale(2.4); }
+          0% { opacity: 0.65; transform: scale(0.8); }
+          100% { opacity: 0; transform: scale(2.5); }
         }
-        .drone-icon { animation: droneFloat 2.8s ease-in-out infinite; }
-        @keyframes droneFloat {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-4px) rotate(6deg); }
+
+        /* ── Drone rotor spin ── */
+        .rotor-cw  { animation: rotorCW  0.06s linear infinite; }
+        .rotor-ccw { animation: rotorCCW 0.06s linear infinite; }
+        @keyframes rotorCW  { to { transform: rotate(360deg);  } }
+        @keyframes rotorCCW { to { transform: rotate(-360deg); } }
+
+        /* ── Destination LZ rings ── */
+        .dest-ring-1 { animation: lzRing 1.5s ease-out infinite; }
+        .dest-ring-2 { animation: lzRing 1.5s ease-out infinite 0.5s; }
+        @keyframes lzRing {
+          0% { opacity: 0.8; transform: scale(0.9); }
+          100% { opacity: 0; transform: scale(1.8); }
         }
-        .leaflet-popup-content-wrapper {
-          background: rgba(4,17,36,0.96) !important;
-          border: 1px solid rgba(255,85,0,0.3) !important;
-          border-radius: 14px !important;
-          color: white !important;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
-        }
-        .leaflet-popup-tip-container { display: none; }
+
+        /* ── HUD pulse ── */
+        @keyframes hudPulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
       `}</style>
 
-      <div className="absolute -top-40 -left-20 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: "rgba(255,85,0,0.04)", filter: "blur(80px)" }} />
+      <div className="absolute -top-40 -left-20 w-[600px] h-[600px] rounded-full pointer-events-none"
+        style={{ background: "rgba(255,85,0,0.04)", filter: "blur(100px)" }} />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
-
         {/* Section label */}
         <div className="flex items-center gap-3 mb-16">
           <span className="w-8 h-px" style={{ background: "#FF5500" }} />
@@ -375,7 +691,7 @@ export function LocationsSection() {
                 )}
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="font-black text-[13px]"
-                    style={{ color: selected === city.id ? "white" : "rgba(255,255,255,0.42)", fontFamily: "'Space Grotesk',sans-serif" }}>
+                    style={{ color: selected === city.id ? "white" : "rgba(255,255,255,0.4)", fontFamily: "'Space Grotesk',sans-serif" }}>
                     {city.city}
                   </span>
                   <div className="w-1.5 h-1.5 rounded-full shrink-0"
@@ -389,14 +705,14 @@ export function LocationsSection() {
             ))}
           </div>
 
-          {/* Map container */}
+          {/* Map */}
           <div className="relative rounded-2xl overflow-hidden"
-            style={{ height: "520px", border: "1px solid rgba(255,255,255,0.08)" }}>
+            style={{ height: "540px", border: "1px solid rgba(255,255,255,0.08)" }}>
 
             <MapContainer
               center={CITIES[0].latlng}
               zoom={12}
-              style={{ height: "520px", width: "100%" }}
+              style={{ height: "540px", width: "100%" }}
               zoomControl
               scrollWheelZoom={false}
               attributionControl={false}
@@ -411,23 +727,24 @@ export function LocationsSection() {
               <HubMarkers onCityClick={handleSelectCity} />
               {showDrone && droneDest && (
                 <DroneLayer
-                  active={droneActive}
+                  running={droneRunning}
                   hub={active.hub}
                   dest={droneDest}
-                  onProgress={setDroneProgress}
+                  onProgress={handleProgress}
+                  onPhaseChange={handlePhaseChange}
                   onComplete={handleDroneComplete}
                 />
               )}
             </MapContainer>
 
-            {/* Live ops HUD */}
+            {/* Live ops badge */}
             <div className="absolute top-4 left-4 z-[800] pointer-events-none">
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
-                style={{ background: "rgba(1,11,25,0.82)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(16px)" }}>
+                style={{ background: "rgba(1,8,18,0.85)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(16px)" }}>
                 <Activity className="w-3 h-3 text-green-400" />
                 <span className="text-[10px] font-bold uppercase tracking-widest"
-                  style={{ color: "rgba(255,255,255,0.4)" }}>Live Operations</span>
-                <span className="text-[9px] text-green-400">●</span>
+                  style={{ color: "rgba(255,255,255,0.35)" }}>Live Ops</span>
+                <span className="text-[9px] animate-pulse text-green-400">●</span>
               </div>
             </div>
 
@@ -438,7 +755,7 @@ export function LocationsSection() {
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   className="absolute inset-0 z-[900] pointer-events-none flex items-center justify-center">
                   <div className="flex items-center gap-2 px-4 py-2.5 rounded-full"
-                    style={{ background: "rgba(1,11,25,0.88)", border: "1px solid rgba(255,85,0,0.35)", backdropFilter: "blur(20px)" }}>
+                    style={{ background: "rgba(1,8,18,0.9)", border: "1px solid rgba(255,85,0,0.4)", backdropFilter: "blur(20px)" }}>
                     <Navigation2 className="w-3.5 h-3.5 animate-spin" style={{ color: "#FF5500" }} />
                     <span className="text-[11px] font-bold uppercase tracking-widest"
                       style={{ color: "rgba(255,255,255,0.6)" }}>Flying to {active.city}…</span>
@@ -447,29 +764,35 @@ export function LocationsSection() {
               )}
             </AnimatePresence>
 
-            {/* Drone progress HUD */}
+            {/* Delivery HUD */}
             <AnimatePresence>
               {showDrone && (
+                <DeliveryHUD
+                  phase={dronePhase}
+                  progress={droneProgress}
+                  droneId={droneId}
+                  alt={tel.alt}
+                  speed={tel.speed}
+                  eta={tel.eta}
+                  hub={active.hub}
+                  dest={droneDest ?? active.hub}
+                />
+              )}
+            </AnimatePresence>
+
+            {/* Delivery burst */}
+            <AnimatePresence>
+              {showBurst && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                  className="absolute bottom-4 left-4 z-[800] rounded-xl p-3.5"
-                  style={{ background: "rgba(1,11,25,0.9)", border: "1px solid rgba(255,85,0,0.28)", backdropFilter: "blur(16px)", minWidth: "200px" }}>
-                  <div className="flex items-center gap-2 mb-2.5">
-                    <Radio className="w-3 h-3 shrink-0" style={{ color: "#FF5500" }} />
-                    <span className="text-[9px] font-black uppercase tracking-widest"
-                      style={{ color: droneActive ? "#FF5500" : "#4ADE80" }}>
-                      {droneActive ? "Drone In Flight" : "Delivered ✓"}
-                    </span>
-                  </div>
-                  <div className="h-1 rounded-full overflow-hidden mb-1.5"
-                    style={{ background: "rgba(255,255,255,0.07)" }}>
-                    <div className="h-full rounded-full transition-all duration-100"
-                      style={{ width: `${droneProgress}%`, background: droneActive ? "#FF5500" : "#4ADE80" }} />
-                  </div>
-                  <div className="flex justify-between" style={{ color: "rgba(255,255,255,0.25)" }}>
-                    <span className="text-[9px]">Hub</span>
-                    <span className="text-[9px] font-bold">{droneProgress}%</span>
-                    <span className="text-[9px]">Drop Zone</span>
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="absolute top-4 right-4 z-[800] rounded-2xl px-4 py-3 flex items-center gap-3"
+                  style={{ background: "rgba(1,8,18,0.92)", border: "1px solid rgba(74,222,128,0.35)", backdropFilter: "blur(20px)" }}>
+                  <span className="text-xl">📦</span>
+                  <div>
+                    <div className="text-[9px] font-black uppercase tracking-widest" style={{ color: "#4ADE80" }}>
+                      Delivered
+                    </div>
+                    <div className="text-[10px] text-white/50 font-medium">{droneId} · {active.city}</div>
                   </div>
                 </motion.div>
               )}
@@ -523,14 +846,40 @@ export function LocationsSection() {
                 ))}
               </div>
 
+              {/* Drone status in card */}
+              {showDrone && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+                  className="mb-3 rounded-xl px-3 py-2.5"
+                  style={{ background: `${PHASE_COLOR[dronePhase]}12`, border: `1px solid ${PHASE_COLOR[dronePhase]}30` }}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[9px] font-black uppercase tracking-widest"
+                      style={{ color: PHASE_COLOR[dronePhase] }}>
+                      {PHASE_LABEL[dronePhase]}
+                    </span>
+                    <span className="text-[9px] font-bold" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
+                      {droneId}
+                    </span>
+                  </div>
+                  <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+                    <motion.div
+                      className="h-full rounded-full"
+                      animate={{ width: `${Math.round(droneProgress * 100)}%` }}
+                      transition={{ duration: 0.15 }}
+                      style={{ background: PHASE_COLOR[dronePhase] }}
+                    />
+                  </div>
+                </motion.div>
+              )}
+
               {active.status !== "Coming Soon" ? (
                 <button
                   onClick={launchDrone}
-                  disabled={droneActive || isFlying}
+                  disabled={droneRunning || isFlying}
                   className="w-full py-3 rounded-full font-bold uppercase tracking-[0.1em] text-white text-[11px] transition-all hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2 mb-3"
                   style={{ background: "#FF5500", boxShadow: "0 4px 20px rgba(255,85,0,0.35)" }}>
                   <Zap className="w-3.5 h-3.5 fill-current" />
-                  {droneActive ? "Drone In Flight…" : "Launch Drone Delivery"}
+                  {droneRunning ? "Drone In Flight…" : "Watch Live Delivery"}
                 </button>
               ) : (
                 <div className="w-full py-3 rounded-full font-bold uppercase tracking-[0.1em] text-center text-[11px] mb-3"
@@ -542,6 +891,7 @@ export function LocationsSection() {
               <button
                 className="w-full py-2.5 rounded-full font-bold uppercase tracking-[0.1em] text-[11px] transition-all"
                 style={{ color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <MapPin className="w-3 h-3 inline mr-1.5" />
                 Request Service in {active.city}
               </button>
             </motion.div>
