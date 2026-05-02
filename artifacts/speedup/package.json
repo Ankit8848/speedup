@@ -78,5 +78,11 @@
     "vite": "catalog:",
     "wouter": "^3.3.5",
     "zod": "catalog:"
+  },
+  "dependencies": {
+    "@types/leaflet": "^1.9.21",
+    "leaflet": "^1.9.4",
+    "maplibre-gl": "^5.24.0",
+    "react-leaflet": "^5.0.0"
   }
 }
