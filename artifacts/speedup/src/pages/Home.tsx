@@ -1,7 +1,10 @@
 import { Navbar } from "@/components/Navbar";
+import { NewsTicker } from "@/components/NewsTicker";
 import { HeroSection } from "@/components/HeroSection";
 import { HowItWorks } from "@/components/HowItWorks";
 import { TechnologySection } from "@/components/TechnologySection";
+import { SafetySection } from "@/components/SafetySection";
+import { LocationsSection } from "@/components/LocationsSection";
 import { UseCases } from "@/components/UseCases";
 import { StatsSection } from "@/components/StatsSection";
 import { SimulationSection } from "@/components/SimulationSection";
@@ -11,7 +14,6 @@ import { CustomCursor } from "@/components/CustomCursor";
 import { useEffect } from "react";
 
 export default function Home() {
-  // Ensure dark mode is active on load
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
@@ -19,11 +21,16 @@ export default function Home() {
   return (
     <div className="bg-background min-h-screen text-foreground">
       <CustomCursor />
+      {/* News ticker — fixed at very top */}
+      <NewsTicker />
+      {/* Navbar sits below ticker (40px offset via its own margin-top) */}
       <Navbar />
-      <main>
+      <main style={{ paddingTop: "96px" }}>
         <HeroSection />
         <HowItWorks />
         <TechnologySection />
+        <SafetySection />
+        <LocationsSection />
         <UseCases />
         <StatsSection />
         <SimulationSection />
