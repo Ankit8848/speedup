@@ -4,80 +4,76 @@ import { Utensils, Stethoscope, Package, ShieldAlert } from "lucide-react";
 const cases = [
   {
     icon: Utensils,
-    title: "Food & Restaurants",
-    desc: "Hot meals delivered in minutes, bypassing all traffic. Temperature-controlled payload keeps food perfect.",
-    color: "#FF5500",
-    bg: "#FFF4EF",
+    tag: "Food & Restaurants",
+    headline: "Hot food. Under 8 minutes.",
+    desc: "SpeedUp bypasses every stoplight, traffic jam, and parking lot. Meals arrive at the right temperature — every time.",
     stat: "< 8 min avg",
   },
   {
     icon: Stethoscope,
-    title: "Medical Supply",
-    desc: "Critical supplies, blood, and medication transported to remote areas and hospitals at unprecedented speed.",
-    color: "#3B82F6",
-    bg: "#EFF6FF",
+    tag: "Medical & Healthcare",
+    headline: "Life-saving speed.",
+    desc: "Blood, medication, AEDs, and critical supplies delivered at drone speed to hospitals, clinics, and remote areas.",
     stat: "FDA compliant",
   },
   {
     icon: Package,
-    title: "E-Commerce",
-    desc: "Last-mile logistics reinvented. Same-hour delivery for retail and e-commerce at a fraction of the cost.",
-    color: "#10B981",
-    bg: "#ECFDF5",
+    tag: "E-Commerce",
+    headline: "Same-hour delivery, redefined.",
+    desc: "Last-mile logistics reimagined. No truck, no driver — just a direct flight from warehouse to doorstep.",
     stat: "30km range",
   },
   {
     icon: ShieldAlert,
-    title: "Emergency Response",
-    desc: "Rapid deployment of AEDs, fire suppression, and first-aid kits. SpeedUp saves lives in minutes, not hours.",
-    color: "#EF4444",
-    bg: "#FEF2F2",
+    tag: "Emergency Response",
+    headline: "Seconds save lives.",
+    desc: "AEDs, fire suppression gear, and first-aid kits deployed in under 2 minutes anywhere in our service zones.",
     stat: "< 2 min deploy",
   },
 ];
 
 export function UseCases() {
   return (
-    <section className="py-28 section-light" id="use-cases">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4"
-            style={{ background: "#FF550012", color: "#FF5500", border: "1px solid #FF550025" }}>
-            Use Cases
-          </div>
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
-            Limitless <span style={{ color: "#FF5500" }}>Applications</span>
+    <section id="use-cases" className="py-36" style={{ background: "#F5F3EF" }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        {/* Label */}
+        <div className="flex items-center gap-3 mb-16">
+          <span className="block w-10 h-px" style={{ background: "#FF5500" }} />
+          <span className="text-xs font-bold tracking-[0.2em] uppercase" style={{ color: "#FF5500" }}>Use Cases</span>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-12 items-end mb-20">
+          <h2 className="font-black text-[#0D0F14] leading-[1.0]" style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", letterSpacing: "-0.03em" }}>
+            Limitless<br />applications.
           </h2>
-          <p className="text-gray-500 text-lg max-w-xl mx-auto">
-            From hot meals to life-saving medicine — SpeedUp serves every industry that demands speed.
+          <p className="text-[#6B7280] text-lg leading-relaxed max-w-md">
+            SpeedUp serves every industry that demands speed, reliability, and precision. If it fits in a drone, we'll deliver it.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 gap-px bg-[#0D0F14]/10 rounded-3xl overflow-hidden">
           {cases.map((item, idx) => (
-            <motion.div key={idx}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: idx * 0.1, duration: 0.5 }}
-              whileHover={{ y: -6 }}
-              className="bg-white rounded-3xl p-8 card-shadow hover:card-shadow-lg transition-all duration-300 group cursor-default"
+              transition={{ delay: idx * 0.08 }}
+              className="bg-[#F5F3EF] p-10 group hover:bg-white transition-colors duration-300"
             >
-              {/* Icon */}
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110"
-                style={{ background: item.bg }}>
-                <item.icon className="w-8 h-8" style={{ color: item.color }} />
+              <div className="flex items-start justify-between mb-8">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "#FF550012" }}>
+                  <item.icon className="w-6 h-6" style={{ color: "#FF5500" }} />
+                </div>
+                <div className="text-xs font-black px-3 py-1.5 rounded-full" style={{ background: "#FF550012", color: "#FF5500" }}>
+                  {item.stat}
+                </div>
               </div>
-
-              <h3 className="text-xl font-black text-gray-900 mb-3">{item.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed mb-6">{item.desc}</p>
-
-              {/* Stat pill */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-                style={{ background: item.bg, color: item.color }}>
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: item.color }} />
-                {item.stat}
+              <div className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: "#FF5500", opacity: 0.7 }}>
+                {item.tag}
               </div>
+              <h3 className="text-2xl font-black text-[#0D0F14] mb-3 leading-tight">{item.headline}</h3>
+              <p className="text-[#6B7280] leading-relaxed">{item.desc}</p>
             </motion.div>
           ))}
         </div>

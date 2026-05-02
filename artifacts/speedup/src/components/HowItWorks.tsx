@@ -1,32 +1,24 @@
 import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Smartphone, Rocket, PackageCheck } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const steps = [
   {
-    icon: Smartphone,
-    step: "01",
+    num: "01",
     title: "Place Your Order",
-    desc: "Open the app, choose your items, and confirm. Your order is instantly routed to the nearest SpeedUp hub.",
-    color: "#FF5500",
+    desc: "Open the SpeedUp app, pick what you need, confirm. Your order instantly routes to the nearest hub — no waiting, no queue.",
   },
   {
-    icon: Rocket,
-    step: "02",
-    title: "Autonomous Launch",
-    desc: "A drone is dispatched from the hub in under 30 seconds — no driver, no traffic, no delays.",
-    color: "#FF7722",
+    num: "02",
+    title: "Drone Dispatched",
+    desc: "A fully autonomous drone launches in under 30 seconds. No driver, no traffic, no delays — just a direct flight path to you.",
   },
   {
-    icon: PackageCheck,
-    step: "03",
-    title: "Precision Delivery",
-    desc: "Your package is gently lowered to your exact location via our smart winch system. Done in under 10 minutes.",
-    color: "#FF9944",
+    num: "03",
+    title: "Doorstep Delivery",
+    desc: "Your package descends via precision winch system directly to your door, rooftop, or balcony. Done in under 10 minutes.",
   },
 ];
 
@@ -35,54 +27,43 @@ export function HowItWorks() {
 
   useEffect(() => {
     if (!sectionRef.current) return;
-    gsap.fromTo(
-      ".hiw-card",
-      { opacity: 0, y: 40 },
-      {
-        opacity: 1, y: 0, stagger: 0.2, duration: 0.7, ease: "power3.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 65%" },
-      }
+    gsap.fromTo(".hiw-step",
+      { opacity: 0, y: 50 },
+      { opacity: 1, y: 0, stagger: 0.25, duration: 0.9, ease: "power3.out",
+        scrollTrigger: { trigger: sectionRef.current, start: "top 60%" } }
     );
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-28 section-gray" id="how-it-works">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4"
-            style={{ background: "#FF550012", color: "#FF5500", border: "1px solid #FF550025" }}>
-            How It Works
-          </div>
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
-            Order to door in <span style={{ color: "#FF5500" }}>3 steps</span>
+    <section ref={sectionRef} id="how-it-works" className="py-36" style={{ background: "#F5F3EF" }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        {/* Section label */}
+        <div className="flex items-center gap-3 mb-16">
+          <span className="block w-10 h-px" style={{ background: "#FF5500" }} />
+          <span className="text-xs font-bold tracking-[0.2em] uppercase" style={{ color: "#FF5500" }}>How It Works</span>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-16 items-end mb-24">
+          <h2 className="font-black text-[#0D0F14] leading-[1.0]" style={{ fontSize: "clamp(2.5rem, 5vw, 4.5rem)", letterSpacing: "-0.03em" }}>
+            Order to door<br />in 3 steps.
           </h2>
-          <p className="text-gray-500 text-lg max-w-xl mx-auto">
-            The simplest, fastest last-mile experience ever built.
+          <p className="text-[#6B7280] text-lg leading-relaxed max-w-md">
+            We've removed every friction point from last-mile delivery. What used to take 45 minutes now takes less than 10.
           </p>
         </div>
 
-        {/* Steps */}
-        <div className="grid md:grid-cols-3 gap-8 relative">
-          {/* Connector line */}
-          <div className="hidden md:block absolute top-16 left-1/6 right-1/6 h-px"
-            style={{ background: "linear-gradient(90deg, #FF5500, #FF9944)" }} />
-
+        {/* Steps — horizontal rule layout like Flytrex */}
+        <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#0D0F14]/10">
           {steps.map((step) => (
-            <div key={step.step} className="hiw-card relative">
-              <div className="bg-white rounded-3xl p-8 card-shadow hover:card-shadow-lg transition-all duration-300 group hover:-translate-y-1 text-center">
-                {/* Step number */}
-                <div className="text-xs font-black tracking-widest mb-5" style={{ color: step.color }}>
-                  STEP {step.step}
-                </div>
-                {/* Icon */}
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transition-transform duration-300 group-hover:scale-110"
-                  style={{ background: step.color + "12" }}>
-                  <step.icon className="w-9 h-9" style={{ color: step.color }} />
-                </div>
-                <h3 className="text-xl font-black text-gray-900 mb-3">{step.title}</h3>
-                <p className="text-gray-500 leading-relaxed">{step.desc}</p>
+            <div key={step.num} className="hiw-step py-10 md:py-0 md:pr-12 md:pl-12 first:pl-0 last:pr-0">
+              <div
+                className="text-6xl font-black mb-8 leading-none"
+                style={{ color: "#0D0F14", opacity: 0.08, letterSpacing: "-0.05em" }}
+              >
+                {step.num}
               </div>
+              <h3 className="text-xl font-black text-[#0D0F14] mb-4">{step.title}</h3>
+              <p className="text-[#6B7280] leading-relaxed">{step.desc}</p>
             </div>
           ))}
         </div>

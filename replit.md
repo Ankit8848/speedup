@@ -21,17 +21,22 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 ### SpeedUp – Drone Delivery (`artifacts/speedup`)
 - **Kind**: react-vite web app
 - **Preview path**: `/` (root)
-- **Description**: Premium, futuristic 3D landing page for SpeedUp drone delivery company
-- **Sections**: Hero, How It Works, Technology, Use Cases, Stats, Simulation, Vision, Final CTA
-- **Tech**: React Three Fiber, GSAP + ScrollTrigger, Framer Motion, Three.js, Tailwind CSS
-- **Features**:
-  - 3D drone built from geometric primitives (WebGL when available, CSS fallback otherwise)
-  - Scroll-triggered animations via GSAP ScrollTrigger
-  - Animated stat counters, glassmorphism cards, neon glow effects
-  - Interactive delivery simulation with animated SVG path
-  - Custom CSS cursor, day/night mode toggle
-  - Dark futuristic palette: deep black + neon cyan (#00D4FF) + purple (#7B2FFF)
-  - Google Fonts: Space Grotesk (headings) + Inter (body)
+- **Description**: Premium cinematic drone delivery landing page — Flytrex-inspired dark/cream alternating design
+- **Sections**: Hero, How It Works, Stats, Technology, Safety, Locations, Use Cases, Simulation, Final CTA, Footer
+- **Tech**: React + Vite, GSAP + ScrollTrigger, Framer Motion, Tailwind CSS v4
+- **Design system**:
+  - Dark navy `#0D0F14` — hero, stats, safety, locations sections
+  - Warm cream `#F5F3EF` — how it works, technology, use cases, simulation sections
+  - Orange `#FF5500` — all accent, CTAs, section labels, highlights
+  - Fonts: Space Grotesk (headings, black weight) + Inter (body)
+- **Key features**:
+  - Transparent navbar on dark hero → solid white + shadow on scroll
+  - Massive bold centered hero typography ("The Sky Is / Your Courier.")
+  - Orange news ticker at top, minimal 5-item nav, "Request Demo" CTA
+  - Flytrex-style accordion tech/safety lists with animated right-panel detail
+  - Animated stat counters, interactive SVG US map, delivery simulation
+  - Orange-fill Final CTA with side-by-side partner + early-access cards
+  - Custom orange cursor, dark footer
 
 ### API Server (`artifacts/api-server`)
 - **Kind**: api (Express 5)
