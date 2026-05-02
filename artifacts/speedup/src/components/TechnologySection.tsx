@@ -118,15 +118,31 @@ export function TechnologySection() {
               {/* Visual card */}
               <div
                 className="w-full rounded-2xl flex items-center justify-center mb-8 overflow-hidden relative"
-                style={{ height: "260px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+                style={{ height: "280px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
               >
-                <div className="absolute inset-0" style={{ background: "rgba(255,85,0,0.03)" }} />
-                <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: "#FF5500", opacity: 0.6 }} />
+                <div className="absolute inset-0" style={{
+                  background: "radial-gradient(ellipse at 50% 50%, rgba(255,85,0,0.08) 0%, transparent 65%)"
+                }} />
+                <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: "#FF5500", opacity: 0.7 }} />
+                {/* Grid overlay */}
+                <div className="absolute inset-0 pointer-events-none opacity-40" style={{
+                  backgroundImage: "linear-gradient(rgba(255,85,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,85,0,0.04) 1px,transparent 1px)",
+                  backgroundSize: "32px 32px"
+                }} />
+                {/* Concentric ring decorations */}
+                <div className="absolute w-48 h-48 rounded-full opacity-10"
+                  style={{ border: "1px solid #FF5500" }} />
+                <div className="absolute w-64 h-64 rounded-full opacity-6"
+                  style={{ border: "1px solid #FF5500" }} />
                 <motion.div
-                  animate={{ y: [-8, 8, -8] }}
+                  animate={{ y: [-8, 8, -8], rotate: [0, 5, 0] }}
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative z-10"
                 >
-                  <slide.icon className="w-20 h-20" style={{ color: "#FF5500", opacity: 0.8 }} strokeWidth={1.2} />
+                  <div className="w-24 h-24 rounded-3xl flex items-center justify-center"
+                    style={{ background: "rgba(255,85,0,0.15)", border: "1px solid rgba(255,85,0,0.3)" }}>
+                    <slide.icon className="w-12 h-12" style={{ color: "#FF5500" }} strokeWidth={1.2} />
+                  </div>
                 </motion.div>
               </div>
 
