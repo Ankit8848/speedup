@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { SpeedUpLogo } from "@/components/SpeedUpLogo";
 import { NewsTicker } from "@/components/NewsTicker";
 import { HeroSection } from "@/components/HeroSection";
 import { HowItWorks } from "@/components/HowItWorks";
@@ -33,17 +34,7 @@ export default function Home() {
       {/* Footer */}
       <footer style={{ background: "#010b19", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#FF5500" }}>
-              <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4">
-                <path d="M12 2L3 8v14h7v-8h4v8h7V8L12 2z" fill="white" />
-              </svg>
-            </div>
-            <span className="font-black text-white text-xs tracking-[0.25em] uppercase"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              SpeedUp
-            </span>
-          </div>
+          <SpeedUpLogo size={30} />
           <p className="text-[11px] font-medium text-white/20 uppercase tracking-widest">
             © {new Date().getFullYear()} SpeedUp Inc. Revolutionizing last-mile delivery.
           </p>

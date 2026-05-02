@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { X, Menu, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { SpeedUpLogo } from "./SpeedUpLogo";
 
 const NAV_LINKS = [
   { label: "How It Works", href: "#how-it-works" },
@@ -43,22 +44,9 @@ export function Navbar() {
           {/* Logo */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="flex items-center gap-3 select-none"
+            className="select-none hover:opacity-90 transition-opacity"
           >
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: "#FF5500" }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-                <path d="M12 2L3 8v14h7v-8h4v8h7V8L12 2z" fill="white" />
-              </svg>
-            </div>
-            <span
-              className="text-sm font-bold tracking-[0.2em] uppercase text-white"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-            >
-              SpeedUp
-            </span>
+            <SpeedUpLogo size={34} />
           </button>
 
           {/* Desktop links */}
@@ -123,14 +111,7 @@ export function Navbar() {
             >
               {/* Close */}
               <div className="flex items-center justify-between px-8 pt-8 pb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-black/20 flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4">
-                      <path d="M12 2L3 8v14h7v-8h4v8h7V8L12 2z" fill="white" />
-                    </svg>
-                  </div>
-                  <span className="text-white font-bold text-sm tracking-widest uppercase">SpeedUp</span>
-                </div>
+                <SpeedUpLogo size={32} wordmarkColor="white" />
                 <button onClick={() => setMenuOpen(false)} className="p-2 text-white/80 hover:text-white transition-colors">
                   <X className="w-5 h-5" />
                 </button>
