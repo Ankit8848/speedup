@@ -92,20 +92,20 @@ const PHASE_LABEL: Record<FlightPhase, string> = {
 };
 
 const PHASE_COLOR: Record<FlightPhase, string> = {
-  idle: "rgba(255,255,255,0.3)",
-  launching: "#FFB020",
+  idle: "#9CA3AF",
+  launching: "#D97706",
   enroute: "#FF5500",
   approaching: "#FF5500",
-  landing: "#FFB020",
-  delivered: "#4ADE80",
+  landing: "#D97706",
+  delivered: "#16A34A",
 };
 
 /* ─── Helpers ─── */
 const statusColor = (s: string) =>
-  s === "Active" ? "#FF5500" : s === "Pilot" ? "#3B82F6" : "rgba(255,255,255,0.3)";
+  s === "Active" ? "#FF5500" : s === "Pilot" ? "#2563EB" : "#D1D5DB";
 
 const statusBg = (s: string) =>
-  s === "Active" ? "rgba(255,85,0,0.15)" : s === "Pilot" ? "rgba(59,130,246,0.15)" : "rgba(255,255,255,0.05)";
+  s === "Active" ? "rgba(255,85,0,0.10)" : s === "Pilot" ? "rgba(37,99,235,0.10)" : "rgba(0,0,0,0.04)";
 
 /** Quadratic bezier interpolation */
 function bezierPoint(
@@ -422,11 +422,11 @@ function DeliveryHUD({
       transition={{ duration: 0.3 }}
       className="absolute bottom-4 left-4 z-[800] rounded-2xl overflow-hidden"
       style={{
-        background: "rgba(1, 8, 18, 0.93)",
-        border: `1px solid ${phaseColor}40`,
+        background: "rgba(255,255,255,0.97)",
+        border: `1px solid ${phaseColor}35`,
         backdropFilter: "blur(20px)",
         minWidth: "240px",
-        boxShadow: `0 8px 32px rgba(0,0,0,0.5), inset 0 0 30px rgba(255,85,0,0.03)`,
+        boxShadow: `0 8px 32px rgba(0,0,0,0.10)`,
       }}
     >
       {/* Top accent bar */}
@@ -437,12 +437,12 @@ function DeliveryHUD({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full"
-              style={{ background: phaseColor, boxShadow: `0 0 6px ${phaseColor}`, animation: !isDelivered ? "hudPulse 1s ease-in-out infinite" : "none" }} />
+              style={{ background: phaseColor, boxShadow: `0 0 6px ${phaseColor}60`, animation: !isDelivered ? "hudPulse 1s ease-in-out infinite" : "none" }} />
             <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: phaseColor }}>
               {PHASE_LABEL[phase]}
             </span>
           </div>
-          <span className="text-[9px] font-bold tracking-wider" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
+          <span className="text-[9px] font-bold tracking-wider" style={{ color: "#9CA3AF", fontFamily: "monospace" }}>
             {droneId}
           </span>
         </div>
@@ -456,29 +456,29 @@ function DeliveryHUD({
               { label: "ETA", value: `${etaMin}:${String(etaSec).padStart(2, "0")}`, icon: "⏱" },
             ].map(item => (
               <div key={item.label} className="rounded-lg p-2 text-center"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <div className="text-[8px] mb-1" style={{ color: "rgba(255,255,255,0.25)" }}>{item.label}</div>
-                <div className="text-[11px] font-black" style={{ color: "white", fontFamily: "monospace" }}>{item.value}</div>
+                style={{ background: "#F7F9FC", border: "1px solid rgba(0,0,0,0.06)" }}>
+                <div className="text-[8px] mb-1" style={{ color: "#9CA3AF" }}>{item.label}</div>
+                <div className="text-[11px] font-black" style={{ color: "#0A0F1E", fontFamily: "monospace" }}>{item.value}</div>
               </div>
             ))}
           </div>
         ) : (
           <div className="flex items-center justify-center gap-2 mb-3 py-2 rounded-lg"
-            style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)" }}>
+            style={{ background: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.20)" }}>
             <span className="text-lg">📦</span>
-            <span className="text-[11px] font-black" style={{ color: "#4ADE80" }}>Package Delivered!</span>
+            <span className="text-[11px] font-black" style={{ color: "#16A34A" }}>Package Delivered!</span>
           </div>
         )}
 
         {/* Progress bar */}
         <div className="mb-2">
           <div className="h-1.5 rounded-full overflow-hidden"
-            style={{ background: "rgba(255,255,255,0.06)" }}>
+            style={{ background: "rgba(0,0,0,0.07)" }}>
             <motion.div
               className="h-full rounded-full"
               animate={{ width: `${Math.round(progress * 100)}%` }}
               transition={{ duration: 0.15 }}
-              style={{ background: isDelivered ? "#4ADE80" : `linear-gradient(90deg, ${phaseColor}80, ${phaseColor})` }}
+              style={{ background: isDelivered ? "#16A34A" : `linear-gradient(90deg, ${phaseColor}80, ${phaseColor})` }}
             />
           </div>
         </div>
@@ -487,31 +487,31 @@ function DeliveryHUD({
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-1">
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#FF5500" }} />
-            <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.2)" }}>Hub</span>
+            <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Hub</span>
           </div>
-          <div className="text-[8px] font-bold" style={{ color: "rgba(255,255,255,0.15)", fontFamily: "monospace" }}>
+          <div className="text-[8px] font-bold" style={{ color: "#C4CBD8", fontFamily: "monospace" }}>
             {Math.round(progress * 100)}%
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.2)" }}>Drop Zone</span>
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#4ADE80" }} />
+            <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Drop Zone</span>
+            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#16A34A" }} />
           </div>
         </div>
       </div>
 
       {/* Coordinates footer */}
       <div className="px-4 pb-3">
-        <div className="flex items-center justify-between pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        <div className="flex items-center justify-between pt-2" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
           <div className="flex items-center gap-3">
-            <Battery className="w-2.5 h-2.5" style={{ color: "rgba(255,255,255,0.2)" }} />
-            <span className="text-[8px] font-bold" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>94%</span>
+            <Battery className="w-2.5 h-2.5" style={{ color: "#9CA3AF" }} />
+            <span className="text-[8px] font-bold" style={{ color: "#6B7280", fontFamily: "monospace" }}>94%</span>
           </div>
           <div className="flex items-center gap-1">
             {[1,2,3,4].map(i => (
-              <div key={i} className="rounded-sm" style={{ width: 3, height: i * 2 + 2, background: i <= 3 ? "#FF5500" : "rgba(255,255,255,0.1)" }} />
+              <div key={i} className="rounded-sm" style={{ width: 3, height: i * 2 + 2, background: i <= 3 ? "#FF5500" : "rgba(0,0,0,0.10)" }} />
             ))}
           </div>
-          <span className="text-[8px] font-bold" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
+          <span className="text-[8px] font-bold" style={{ color: "#9CA3AF", fontFamily: "monospace" }}>
             {dest[0].toFixed(4)}, {dest[1].toFixed(4)}
           </span>
         </div>
@@ -580,27 +580,27 @@ export function LocationsSection() {
 
   return (
     <section id="locations" className="relative overflow-hidden"
-      style={{ background: "#010b19", padding: "9rem 0" }}>
+      style={{ background: "#FFFFFF", padding: "9rem 0" }}>
 
       <style>{`
         /* ── Leaflet overrides ── */
-        .leaflet-container { background: #010b19 !important; }
+        .leaflet-container { background: #EEF2F9 !important; }
         .leaflet-control-attribution { display: none !important; }
         .leaflet-control-zoom {
-          border: 1px solid rgba(255,255,255,0.09) !important;
+          border: 1px solid rgba(0,0,0,0.10) !important;
           border-radius: 12px !important;
           overflow: hidden;
-          background: rgba(1,8,18,0.88) !important;
+          background: rgba(255,255,255,0.95) !important;
           backdrop-filter: blur(12px);
-          box-shadow: none !important;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
         }
         .leaflet-control-zoom a {
           background: transparent !important;
-          color: rgba(255,255,255,0.4) !important;
-          border-color: rgba(255,255,255,0.07) !important;
+          color: #6B7280 !important;
+          border-color: rgba(0,0,0,0.07) !important;
           width: 32px !important; height: 32px !important; line-height: 32px !important;
         }
-        .leaflet-control-zoom a:hover { background: rgba(255,85,0,0.14) !important; color: #FF5500 !important; }
+        .leaflet-control-zoom a:hover { background: rgba(255,85,0,0.08) !important; color: #FF5500 !important; }
 
         /* ── Hub animations ── */
         .hub-ring { animation: hubRingPulse 2s ease-out infinite; }
@@ -628,8 +628,7 @@ export function LocationsSection() {
         @keyframes hudPulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
       `}</style>
 
-      <div className="absolute -top-40 -left-20 w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{ background: "rgba(255,85,0,0.04)", filter: "blur(100px)" }} />
+      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "rgba(0,0,0,0.06)" }} />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         {/* Section label */}
@@ -642,24 +641,24 @@ export function LocationsSection() {
 
         {/* Heading */}
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-12">
-          <h2 className="font-black uppercase text-white leading-[0.9]"
-            style={{ fontSize: "clamp(2.5rem,6vw,6rem)", letterSpacing: "-0.03em", fontFamily: "'Space Grotesk',sans-serif" }}>
+          <h2 className="font-black uppercase leading-[0.9]"
+            style={{ fontSize: "clamp(2.5rem,6vw,6rem)", letterSpacing: "-0.03em", fontFamily: "'Space Grotesk',sans-serif", color: "#0A0F1E" }}>
             Delivering<br />across<br />America.
           </h2>
           <div className="flex flex-col gap-3">
-            <p className="text-white/40 text-base max-w-xs lg:text-right leading-relaxed">
+            <p className="text-base max-w-xs lg:text-right leading-relaxed" style={{ color: "#6B7280" }}>
               Live drone ops in 5 cities. A new city every quarter.
             </p>
             <div className="flex items-center lg:justify-end gap-4 flex-wrap">
               {[
                 { label: "Active", color: "#FF5500" },
-                { label: "Pilot", color: "#3B82F6" },
-                { label: "Coming Soon", color: "rgba(255,255,255,0.3)" },
+                { label: "Pilot", color: "#2563EB" },
+                { label: "Coming Soon", color: "#D1D5DB" },
               ].map(l => (
                 <div key={l.label} className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full" style={{ background: l.color }} />
                   <span className="text-[10px] font-semibold uppercase tracking-wider"
-                    style={{ color: "rgba(255,255,255,0.3)" }}>{l.label}</span>
+                    style={{ color: "#9CA3AF" }}>{l.label}</span>
                 </div>
               ))}
             </div>
@@ -681,8 +680,9 @@ export function LocationsSection() {
                 transition={{ delay: idx * 0.05 }}
                 className="w-full text-left rounded-xl px-4 py-3.5 transition-all duration-200 relative overflow-hidden"
                 style={{
-                  background: selected === city.id ? "rgba(255,85,0,0.1)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${selected === city.id ? "rgba(255,85,0,0.3)" : "rgba(255,255,255,0.06)"}`,
+                  background: selected === city.id ? "rgba(255,85,0,0.07)" : "#FFFFFF",
+                  border: `1px solid ${selected === city.id ? "rgba(255,85,0,0.25)" : "rgba(0,0,0,0.07)"}`,
+                  boxShadow: selected === city.id ? "0 2px 8px rgba(255,85,0,0.08)" : "none",
                 }}
               >
                 {selected === city.id && (
@@ -691,14 +691,14 @@ export function LocationsSection() {
                 )}
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="font-black text-[13px]"
-                    style={{ color: selected === city.id ? "white" : "rgba(255,255,255,0.4)", fontFamily: "'Space Grotesk',sans-serif" }}>
+                    style={{ color: selected === city.id ? "#0A0F1E" : "#4B5675", fontFamily: "'Space Grotesk',sans-serif" }}>
                     {city.city}
                   </span>
                   <div className="w-1.5 h-1.5 rounded-full shrink-0"
                     style={{ background: statusColor(city.status) }} />
                 </div>
                 <div className="text-[9px] font-semibold uppercase tracking-wider"
-                  style={{ color: selected === city.id ? "rgba(255,85,0,0.6)" : "rgba(255,255,255,0.18)" }}>
+                  style={{ color: selected === city.id ? "#FF5500" : "#9CA3AF" }}>
                   {city.state} · {city.status}
                 </div>
               </motion.button>
@@ -707,7 +707,7 @@ export function LocationsSection() {
 
           {/* Map */}
           <div className="relative rounded-2xl overflow-hidden"
-            style={{ height: "540px", border: "1px solid rgba(255,255,255,0.08)" }}>
+            style={{ height: "540px", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
 
             <MapContainer
               center={CITIES[0].latlng}
@@ -718,7 +718,7 @@ export function LocationsSection() {
               attributionControl={false}
             >
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                 subdomains="abcd"
                 maxZoom={19}
               />
@@ -740,11 +740,10 @@ export function LocationsSection() {
             {/* Live ops badge */}
             <div className="absolute top-4 left-4 z-[800] pointer-events-none">
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
-                style={{ background: "rgba(1,8,18,0.85)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(16px)" }}>
-                <Activity className="w-3 h-3 text-green-400" />
-                <span className="text-[10px] font-bold uppercase tracking-widest"
-                  style={{ color: "rgba(255,255,255,0.35)" }}>Live Ops</span>
-                <span className="text-[9px] animate-pulse text-green-400">●</span>
+                style={{ background: "rgba(255,255,255,0.95)", border: "1px solid rgba(0,0,0,0.08)", backdropFilter: "blur(16px)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+                <Activity className="w-3 h-3" style={{ color: "#16A34A" }} />
+                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#6B7280" }}>Live Ops</span>
+                <span className="text-[9px] animate-pulse" style={{ color: "#16A34A" }}>●</span>
               </div>
             </div>
 
@@ -755,10 +754,9 @@ export function LocationsSection() {
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   className="absolute inset-0 z-[900] pointer-events-none flex items-center justify-center">
                   <div className="flex items-center gap-2 px-4 py-2.5 rounded-full"
-                    style={{ background: "rgba(1,8,18,0.9)", border: "1px solid rgba(255,85,0,0.4)", backdropFilter: "blur(20px)" }}>
+                    style={{ background: "rgba(255,255,255,0.95)", border: "1px solid rgba(255,85,0,0.35)", backdropFilter: "blur(20px)", boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}>
                     <Navigation2 className="w-3.5 h-3.5 animate-spin" style={{ color: "#FF5500" }} />
-                    <span className="text-[11px] font-bold uppercase tracking-widest"
-                      style={{ color: "rgba(255,255,255,0.6)" }}>Flying to {active.city}…</span>
+                    <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "#4B5675" }}>Flying to {active.city}…</span>
                   </div>
                 </motion.div>
               )}
@@ -786,13 +784,13 @@ export function LocationsSection() {
                 <motion.div
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   className="absolute top-4 right-4 z-[800] rounded-2xl px-4 py-3 flex items-center gap-3"
-                  style={{ background: "rgba(1,8,18,0.92)", border: "1px solid rgba(74,222,128,0.35)", backdropFilter: "blur(20px)" }}>
+                  style={{ background: "rgba(255,255,255,0.97)", border: "1px solid rgba(22,163,74,0.25)", backdropFilter: "blur(20px)", boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}>
                   <span className="text-xl">📦</span>
                   <div>
-                    <div className="text-[9px] font-black uppercase tracking-widest" style={{ color: "#4ADE80" }}>
+                    <div className="text-[9px] font-black uppercase tracking-widest" style={{ color: "#16A34A" }}>
                       Delivered
                     </div>
-                    <div className="text-[10px] text-white/50 font-medium">{droneId} · {active.city}</div>
+                    <div className="text-[10px] font-medium" style={{ color: "#6B7280" }}>{droneId} · {active.city}</div>
                   </div>
                 </motion.div>
               )}
@@ -806,7 +804,7 @@ export function LocationsSection() {
               initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }}
               transition={{ duration: 0.22 }}
               className="rounded-2xl p-6 flex flex-col relative overflow-hidden"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
 
               <div className="absolute top-0 left-0 right-0 h-0.5"
                 style={{ background: statusColor(active.status) }} />
@@ -821,14 +819,14 @@ export function LocationsSection() {
                 </div>
               </div>
 
-              <h3 className="font-black uppercase text-white leading-none mb-1"
-                style={{ fontSize: "2.2rem", letterSpacing: "-0.03em", fontFamily: "'Space Grotesk',sans-serif" }}>
+              <h3 className="font-black uppercase leading-none mb-1"
+                style={{ fontSize: "2.2rem", letterSpacing: "-0.03em", fontFamily: "'Space Grotesk',sans-serif", color: "#0A0F1E" }}>
                 {active.city}
               </h3>
               <p className="font-bold text-[10px] uppercase tracking-widest mb-4" style={{ color: "#FF5500" }}>
                 {active.state}
               </p>
-              <p className="text-white/30 text-xs leading-relaxed mb-5 flex-1">{active.desc}</p>
+              <p className="text-xs leading-relaxed mb-5 flex-1" style={{ color: "#6B7280" }}>{active.desc}</p>
 
               <div className="grid grid-cols-3 gap-2 mb-5">
                 {[
@@ -837,11 +835,11 @@ export function LocationsSection() {
                   { icon: Plane, label: "Zones", value: active.zones > 0 ? String(active.zones) : "Soon" },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="rounded-xl p-3 text-center"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                    style={{ background: "#F7F9FC", border: "1px solid rgba(0,0,0,0.06)" }}>
                     <Icon className="w-3.5 h-3.5 mx-auto mb-2" style={{ color: "#FF5500" }} />
-                    <div className="font-black text-white text-sm leading-none"
-                      style={{ fontFamily: "'Space Grotesk',sans-serif" }}>{value}</div>
-                    <div className="text-white/25 text-[9px] mt-1 uppercase tracking-wider">{label}</div>
+                    <div className="font-black text-sm leading-none"
+                      style={{ fontFamily: "'Space Grotesk',sans-serif", color: "#0A0F1E" }}>{value}</div>
+                    <div className="text-[9px] mt-1 uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{label}</div>
                   </div>
                 ))}
               </div>
@@ -851,17 +849,17 @@ export function LocationsSection() {
                 <motion.div
                   initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
                   className="mb-3 rounded-xl px-3 py-2.5"
-                  style={{ background: `${PHASE_COLOR[dronePhase]}12`, border: `1px solid ${PHASE_COLOR[dronePhase]}30` }}>
+                  style={{ background: `${PHASE_COLOR[dronePhase]}0C`, border: `1px solid ${PHASE_COLOR[dronePhase]}25` }}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[9px] font-black uppercase tracking-widest"
                       style={{ color: PHASE_COLOR[dronePhase] }}>
                       {PHASE_LABEL[dronePhase]}
                     </span>
-                    <span className="text-[9px] font-bold" style={{ color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
+                    <span className="text-[9px] font-bold" style={{ color: "#9CA3AF", fontFamily: "monospace" }}>
                       {droneId}
                     </span>
                   </div>
-                  <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+                  <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.07)" }}>
                     <motion.div
                       className="h-full rounded-full"
                       animate={{ width: `${Math.round(droneProgress * 100)}%` }}
@@ -877,20 +875,23 @@ export function LocationsSection() {
                   onClick={launchDrone}
                   disabled={droneRunning || isFlying}
                   className="w-full py-3 rounded-full font-bold uppercase tracking-[0.1em] text-white text-[11px] transition-all hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2 mb-3"
-                  style={{ background: "#FF5500", boxShadow: "0 4px 20px rgba(255,85,0,0.35)" }}>
+                  style={{ background: "#FF5500", boxShadow: "0 4px 16px rgba(255,85,0,0.25)" }}>
                   <Zap className="w-3.5 h-3.5 fill-current" />
                   {droneRunning ? "Drone In Flight…" : "Watch Live Delivery"}
                 </button>
               ) : (
                 <div className="w-full py-3 rounded-full font-bold uppercase tracking-[0.1em] text-center text-[11px] mb-3"
-                  style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                  style={{ background: "#F7F9FC", color: "#9CA3AF", border: "1px solid rgba(0,0,0,0.07)" }}>
                   Coming Soon
                 </div>
               )}
 
               <button
                 className="w-full py-2.5 rounded-full font-bold uppercase tracking-[0.1em] text-[11px] transition-all"
-                style={{ color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                style={{ color: "#6B7280", border: "1px solid rgba(0,0,0,0.10)" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.20)"; (e.currentTarget as HTMLElement).style.color = "#0A0F1E"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.10)"; (e.currentTarget as HTMLElement).style.color = "#6B7280"; }}
+              >
                 <MapPin className="w-3 h-3 inline mr-1.5" />
                 Request Service in {active.city}
               </button>

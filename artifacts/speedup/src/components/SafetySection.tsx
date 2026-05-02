@@ -54,11 +54,10 @@ export function SafetySection() {
 
   return (
     <section id="safety" className="relative overflow-hidden"
-      style={{ background: "#03113d", padding: "9rem 0" }}>
+      style={{ background: "#F7F9FC", padding: "9rem 0" }}>
 
-      {/* Glow */}
-      <div className="absolute -top-40 -left-40 w-[480px] h-[480px] rounded-full pointer-events-none"
-        style={{ background: "rgba(255,85,0,0.06)", filter: "blur(80px)" }} />
+      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "rgba(0,0,0,0.06)" }} />
+      <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: "rgba(0,0,0,0.06)" }} />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         {/* Label */}
@@ -71,13 +70,13 @@ export function SafetySection() {
           {/* Left */}
           <div>
             <h2
-              className="font-black uppercase text-white leading-[0.9] mb-14"
-              style={{ fontSize: "clamp(2.5rem, 5vw, 5.5rem)", letterSpacing: "-0.03em", fontFamily: "'Space Grotesk', sans-serif" }}
+              className="font-black uppercase leading-[0.9] mb-14"
+              style={{ fontSize: "clamp(2.5rem, 5vw, 5.5rem)", letterSpacing: "-0.03em", fontFamily: "'Space Grotesk', sans-serif", color: "#0A0F1E" }}
             >
               Trust built<br />into every<br />layer.
             </h2>
 
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+            <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
               {SLIDES.map((s, i) => {
                 const SIcon = s.icon;
                 const active = i === current;
@@ -86,23 +85,23 @@ export function SafetySection() {
                     key={s.id}
                     onClick={() => setCurrent(i)}
                     className="w-full flex items-center justify-between py-5 text-left group transition-all duration-200"
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+                    style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
                   >
                     <div className="flex items-center gap-4">
                       <div
                         className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 shrink-0"
-                        style={{ background: active ? "#FF5500" : "rgba(255,255,255,0.05)" }}
+                        style={{ background: active ? "#FF5500" : "rgba(0,0,0,0.05)" }}
                       >
-                        <SIcon className="w-4 h-4" style={{ color: active ? "white" : "rgba(255,255,255,0.35)" }} />
+                        <SIcon className="w-4 h-4" style={{ color: active ? "white" : "#8892A4" }} />
                       </div>
                       <span
                         className="text-sm font-bold uppercase tracking-[0.08em] transition-colors"
-                        style={{ color: active ? "#FF5500" : "rgba(255,255,255,0.45)" }}
+                        style={{ color: active ? "#FF5500" : "#4B5675" }}
                       >
                         {s.label}
                       </span>
                     </div>
-                    <ChevronRight className="w-4 h-4" style={{ color: active ? "#FF5500" : "rgba(255,255,255,0.15)" }} />
+                    <ChevronRight className="w-4 h-4" style={{ color: active ? "#FF5500" : "rgba(0,0,0,0.15)" }} />
                   </button>
                 );
               })}
@@ -122,34 +121,41 @@ export function SafetySection() {
               {/* Metric card */}
               <div
                 className="rounded-2xl p-8 mb-8 relative overflow-hidden"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+                style={{
+                  background: "#FFFFFF",
+                  border: "1px solid rgba(0,0,0,0.07)",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+                }}
               >
                 <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: "#FF5500" }} />
                 <Icon className="w-8 h-8 mb-5" style={{ color: "#FF5500" }} strokeWidth={1.5} />
                 <div
-                  className="font-black text-white leading-none mb-2"
-                  style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", letterSpacing: "-0.04em", fontFamily: "'Space Grotesk', sans-serif" }}
+                  className="font-black leading-none mb-2"
+                  style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", letterSpacing: "-0.04em", fontFamily: "'Space Grotesk', sans-serif", color: "#0A0F1E" }}
                 >
                   {slide.metric}
                 </div>
-                <div className="text-[10px] uppercase tracking-[0.2em] font-semibold text-white/30">{slide.metricSub}</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] font-semibold" style={{ color: "#9CA3AF" }}>{slide.metricSub}</div>
               </div>
 
               <h3
-                className="font-black uppercase text-white mb-4 leading-[0.95]"
-                style={{ fontSize: "clamp(1rem, 2vw, 1.3rem)", letterSpacing: "-0.01em", fontFamily: "'Space Grotesk', sans-serif" }}
+                className="font-black uppercase mb-4 leading-[0.95]"
+                style={{ fontSize: "clamp(1rem, 2vw, 1.3rem)", letterSpacing: "-0.01em", fontFamily: "'Space Grotesk', sans-serif", color: "#0A0F1E" }}
               >
                 {slide.headline}
               </h3>
-              <p className="text-white/40 leading-relaxed mb-8 text-sm">{slide.body}</p>
+              <p className="leading-relaxed mb-8 text-sm" style={{ color: "#6B7280" }}>{slide.body}</p>
 
               <div className="grid grid-cols-2 gap-2">
                 {slide.facts.map((f) => (
                   <div key={f}
                     className="flex items-start gap-2.5 p-3 rounded-xl"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                    style={{
+                      background: "#FFFFFF",
+                      border: "1px solid rgba(0,0,0,0.07)",
+                    }}>
                     <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: "#FF5500" }} />
-                    <span className="text-[11px] text-white/40 font-medium leading-relaxed">{f}</span>
+                    <span className="text-[11px] font-medium leading-relaxed" style={{ color: "#4B5675" }}>{f}</span>
                   </div>
                 ))}
               </div>

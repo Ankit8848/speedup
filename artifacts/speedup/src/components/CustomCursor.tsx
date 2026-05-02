@@ -89,33 +89,33 @@ export function CustomCursor() {
 
           {/* ── Spinning blades — top-left rotor (CW) ── */}
           <g style={{ transformBox: "fill-box", transformOrigin: "10px 10px", animation: "rotorSpinA 0.07s linear infinite" }}>
-            <line x1="3.5" y1="10" x2="16.5" y2="10" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" />
-            <line x1="10" y1="3.5" x2="10" y2="16.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="3.5" y1="10" x2="16.5" y2="10" stroke="rgba(10,15,30,0.45)" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="10" y1="3.5" x2="10" y2="16.5" stroke="rgba(10,15,30,0.45)" strokeWidth="1.8" strokeLinecap="round" />
           </g>
 
           {/* ── Top-right rotor (CCW) ── */}
           <g style={{ transformBox: "fill-box", transformOrigin: "42px 10px", animation: "rotorSpinB 0.07s linear infinite" }}>
-            <line x1="35.5" y1="10" x2="48.5" y2="10" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" />
-            <line x1="42" y1="3.5" x2="42" y2="16.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="35.5" y1="10" x2="48.5" y2="10" stroke="rgba(10,15,30,0.45)" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="42" y1="3.5" x2="42" y2="16.5" stroke="rgba(10,15,30,0.45)" strokeWidth="1.8" strokeLinecap="round" />
           </g>
 
           {/* ── Bottom-left rotor (CCW) ── */}
           <g style={{ transformBox: "fill-box", transformOrigin: "10px 42px", animation: "rotorSpinB 0.07s linear infinite" }}>
-            <line x1="3.5" y1="42" x2="16.5" y2="42" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" />
-            <line x1="10" y1="35.5" x2="10" y2="48.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="3.5" y1="42" x2="16.5" y2="42" stroke="rgba(10,15,30,0.45)" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="10" y1="35.5" x2="10" y2="48.5" stroke="rgba(10,15,30,0.45)" strokeWidth="1.8" strokeLinecap="round" />
           </g>
 
           {/* ── Bottom-right rotor (CW) ── */}
           <g style={{ transformBox: "fill-box", transformOrigin: "42px 42px", animation: "rotorSpinA 0.07s linear infinite" }}>
-            <line x1="35.5" y1="42" x2="48.5" y2="42" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" />
-            <line x1="42" y1="35.5" x2="42" y2="48.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="35.5" y1="42" x2="48.5" y2="42" stroke="rgba(10,15,30,0.45)" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="42" y1="35.5" x2="42" y2="48.5" stroke="rgba(10,15,30,0.45)" strokeWidth="1.8" strokeLinecap="round" />
           </g>
 
           {/* ── Central body ── */}
           <polygon points="26,19 31,23 31,29 26,33 21,29 21,23"
-            fill="#FF5500" style={{ filter: "drop-shadow(0 0 4px #FF5500)" }} />
+            fill="#FF5500" style={{ filter: "drop-shadow(0 0 4px rgba(255,85,0,0.5))" }} />
           {/* Camera lens */}
-          <circle cx="26" cy="26" r="3.5" fill="#010b19" opacity="0.9" />
+          <circle cx="26" cy="26" r="3.5" fill="rgba(10,15,30,0.85)" />
           <circle cx="26" cy="26" r="1.8" fill="#FF5500" style={{ animation: "droneGlow 1.5s ease-in-out infinite" }} />
           <circle cx="26" cy="26" r="0.8" fill="white" />
         </svg>
@@ -126,7 +126,7 @@ export function CustomCursor() {
         className="fixed top-0 left-0 pointer-events-none z-[10000] rounded-full"
         animate={{ x: pos.x - 2, y: pos.y - 2 }}
         transition={{ type: "spring", stiffness: 2000, damping: 50, mass: 0.1 }}
-        style={{ width: 4, height: 4, background: "white", boxShadow: "0 0 6px #FF5500" }}
+        style={{ width: 4, height: 4, background: "#0A0F1E", boxShadow: "0 0 6px rgba(255,85,0,0.6)" }}
       />
 
       {/* Motion trail ring — trails behind with heavy lag */}

@@ -30,66 +30,66 @@ export function Navbar() {
 
   return (
     <>
-      {/* Main navbar */}
       <div
         className="fixed top-0 left-0 right-0 z-40 transition-all duration-300"
         style={{
           marginTop: "40px",
-          background: scrolled ? "rgba(1,11,25,0.92)" : "transparent",
-          backdropFilter: scrolled ? "blur(20px)" : "none",
-          borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
+          background: scrolled ? "rgba(255,255,255,0.97)" : "rgba(255,255,255,0.85)",
+          backdropFilter: "blur(20px)",
+          borderBottom: `1px solid ${scrolled ? "rgba(0,0,0,0.09)" : "rgba(0,0,0,0.04)"}`,
+          boxShadow: scrolled ? "0 2px 20px rgba(0,0,0,0.06)" : "none",
         }}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-[72px]">
-          {/* Logo */}
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-[68px]">
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="select-none hover:opacity-90 transition-opacity"
+            className="select-none hover:opacity-80 transition-opacity"
           >
-            <SpeedUpLogo size={34} />
+            <SpeedUpLogo size={34} wordmarkColor="#0A0F1E" />
           </button>
 
-          {/* Desktop links */}
           <nav className="hidden lg:flex items-center gap-1">
             {NAV_LINKS.map((link) => (
               <button
                 key={link.label}
                 onClick={() => scrollTo(link.href)}
-                className="px-4 py-2 text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-white/60 hover:text-white transition-colors rounded-full hover:bg-white/5"
+                className="px-4 py-2 text-[0.78rem] font-semibold uppercase tracking-[0.08em] transition-colors rounded-full hover:bg-black/5"
+                style={{ color: "#4B5675" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#0A0F1E")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#4B5675")}
               >
                 {link.label}
               </button>
             ))}
           </nav>
 
-          {/* Right CTAs */}
           <div className="hidden lg:flex items-center gap-3">
             <button
               onClick={() => scrollTo("#locations")}
-              className="px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] rounded-full text-white/70 border border-white/20 hover:bg-white/8 hover:text-white transition-all"
+              className="px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] rounded-full transition-all hover:bg-black/5"
+              style={{ color: "#4B5675", border: "1px solid rgba(0,0,0,0.15)" }}
             >
               Find My City
             </button>
             <button
               onClick={() => scrollTo("#simulation")}
-              className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] rounded-full text-[#010b19] transition-all hover:opacity-90 hover:scale-[1.03]"
-              style={{ background: "#FF5500", color: "white", boxShadow: "0 4px 20px rgba(255,85,0,0.35)" }}
+              className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] rounded-full text-white transition-all hover:opacity-90 hover:scale-[1.02]"
+              style={{ background: "#FF5500", boxShadow: "0 4px 16px rgba(255,85,0,0.3)" }}
             >
               Request Demo <ArrowRight className="w-3 h-3" />
             </button>
           </div>
 
-          {/* Mobile hamburger */}
           <button
             onClick={() => setMenuOpen(true)}
-            className="lg:hidden p-2 text-white/80 hover:text-white transition-colors"
+            className="lg:hidden p-2 transition-colors"
+            style={{ color: "#4B5675" }}
           >
             <Menu className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      {/* Mobile slide-in drawer (Flytrex style — slides from right, orange fill) */}
       <AnimatePresence>
         {menuOpen && (
           <>
@@ -98,7 +98,8 @@ export function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-50 bg-black/60"
+              className="fixed inset-0 z-50"
+              style={{ background: "rgba(10,15,30,0.35)", backdropFilter: "blur(4px)" }}
               onClick={() => setMenuOpen(false)}
             />
             <motion.div
@@ -109,7 +110,6 @@ export function Navbar() {
               className="fixed top-0 right-0 h-full w-full lg:w-[380px] z-50 flex flex-col"
               style={{ background: "#FF5500" }}
             >
-              {/* Close */}
               <div className="flex items-center justify-between px-8 pt-8 pb-6">
                 <SpeedUpLogo size={32} wordmarkColor="white" />
                 <button onClick={() => setMenuOpen(false)} className="p-2 text-white/80 hover:text-white transition-colors">
@@ -117,7 +117,6 @@ export function Navbar() {
                 </button>
               </div>
 
-              {/* Links */}
               <nav className="flex-1 px-8 space-y-1 overflow-y-auto">
                 {NAV_LINKS.map((link, i) => (
                   <motion.button
@@ -142,7 +141,8 @@ export function Navbar() {
                 </button>
                 <button
                   onClick={() => scrollTo("#simulation")}
-                  className="w-full py-4 text-sm font-bold uppercase tracking-widest text-[#FF5500] rounded-full bg-white hover:opacity-90 transition-opacity"
+                  className="w-full py-4 text-sm font-bold uppercase tracking-widest rounded-full bg-white hover:opacity-90 transition-opacity"
+                  style={{ color: "#FF5500" }}
                 >
                   Request Demo
                 </button>
