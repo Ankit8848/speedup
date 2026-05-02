@@ -13,11 +13,11 @@ import { CustomCursor } from "@/components/CustomCursor";
 
 export default function Home() {
   return (
-    <div className="min-h-screen" style={{ background: "#0D0F14" }}>
+    <div style={{ background: "#010b19" }}>
       <CustomCursor />
       <NewsTicker />
       <Navbar />
-      {/* No top padding — hero sits flush behind transparent navbar */}
+      {/* No padding — hero starts immediately behind transparent nav */}
       <main style={{ paddingTop: "40px" }}>
         <HeroSection />
         <HowItWorks />
@@ -29,22 +29,30 @@ export default function Home() {
         <SimulationSection />
         <FinalCTA />
       </main>
-      <footer style={{ background: "#0D0F14", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
+
+      {/* Footer */}
+      <footer style={{ background: "#010b19", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#FF5500" }}>
               <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4">
                 <path d="M12 2L3 8v14h7v-8h4v8h7V8L12 2z" fill="white" />
               </svg>
             </div>
-            <span className="font-black text-white tracking-widest text-sm uppercase">SpeedUp</span>
+            <span className="font-black text-white text-xs tracking-[0.25em] uppercase"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              SpeedUp
+            </span>
           </div>
-          <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.2)" }}>
-            &copy; {new Date().getFullYear()} SpeedUp Inc. All rights reserved.
+          <p className="text-[11px] font-medium text-white/20 uppercase tracking-widest">
+            © {new Date().getFullYear()} SpeedUp Inc. Revolutionizing last-mile delivery.
           </p>
-          <div className="flex gap-6">
+          <div className="flex gap-8">
             {["Privacy", "Terms", "Contact"].map(l => (
-              <a key={l} href="#" className="text-xs font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.25)" }}>{l}</a>
+              <a key={l} href="#" className="text-[11px] font-bold uppercase tracking-[0.15em] transition-colors hover:text-white/60"
+                style={{ color: "rgba(255,255,255,0.2)" }}>
+                {l}
+              </a>
             ))}
           </div>
         </div>

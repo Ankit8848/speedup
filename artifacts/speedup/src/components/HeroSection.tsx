@@ -2,143 +2,162 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 export function HeroSection() {
-  const scrollToNext = () => {
-    const el = document.getElementById("how-it-works");
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <section
       id="hero"
-      className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: "#0D0F14" }}
+      className="relative w-full overflow-hidden flex flex-col"
+      style={{ minHeight: "100dvh", background: "#010b19" }}
     >
-      {/* Subtle texture overlay */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,85,0,0.06) 0%, transparent 50%),
-                          radial-gradient(circle at 80% 20%, rgba(255,85,0,0.04) 0%, transparent 45%)`,
-      }} />
+      {/* Background drone image with gradient overlay — Flytrex style */}
+      <div className="absolute inset-0">
+        {/* Simulated aerial/dark cityscape using gradient layers */}
+        <div className="absolute inset-0" style={{
+          background: `
+            radial-gradient(ellipse at 70% 40%, rgba(255,85,0,0.08) 0%, transparent 55%),
+            radial-gradient(ellipse at 20% 80%, rgba(255,85,0,0.05) 0%, transparent 45%),
+            #010b19
+          `
+        }} />
+        {/* Left-to-right overlay like Flytrex drone background */}
+        <div className="absolute inset-0" style={{
+          background: "linear-gradient(90deg, rgba(1,11,25,0.85) 0%, rgba(1,11,25,0.5) 50%, rgba(1,11,25,0.1) 100%)"
+        }} />
+      </div>
 
-      {/* Thin horizontal line accents */}
-      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
-      <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
+      {/* Glow blobs — Flytrex signature decoration */}
+      <div className="absolute -top-32 -right-32 w-[620px] h-[620px] rounded-full pointer-events-none"
+        style={{ background: "rgba(255,85,0,0.06)", filter: "blur(80px)" }} />
+      <div className="absolute -bottom-40 -left-32 w-[480px] h-[480px] rounded-full pointer-events-none"
+        style={{ background: "rgba(255,85,0,0.05)", filter: "blur(80px)" }} />
 
-      {/* Grain texture overlay */}
-      <div className="absolute inset-0 pointer-events-none select-none" style={{ opacity: 0.025 }}
-        dangerouslySetInnerHTML={{ __html: `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter><rect width="300" height="300" filter="url(#n)" opacity="1"/></svg>` }} />
+      {/* Vertical rule lines */}
+      <div className="absolute inset-y-0 left-[8%] w-px hidden lg:block"
+        style={{ background: "linear-gradient(180deg, transparent, rgba(255,85,0,0.2) 40%, rgba(255,85,0,0.1) 70%, transparent)" }} />
+      <div className="absolute inset-y-0 right-[8%] w-px hidden lg:block"
+        style={{ background: "linear-gradient(180deg, transparent, rgba(255,85,0,0.12) 40%, transparent)" }} />
 
-      {/* Vertical line accents */}
-      <div className="absolute top-0 bottom-0 pointer-events-none" style={{ left: "8%", width: "1px", background: "linear-gradient(180deg, transparent 0%, rgba(255,85,0,0.15) 30%, rgba(255,85,0,0.08) 70%, transparent 100%)" }} />
-      <div className="absolute top-0 bottom-0 pointer-events-none" style={{ right: "8%", width: "1px", background: "linear-gradient(180deg, transparent 0%, rgba(255,85,0,0.10) 30%, rgba(255,85,0,0.05) 70%, transparent 100%)" }} />
+      {/* Content */}
+      <div className="relative z-10 flex-1 flex flex-col justify-center max-w-7xl mx-auto px-6 lg:px-10 w-full pt-32 pb-24">
 
-      {/* Main content — centered */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-6 lg:px-10 text-center">
-        {/* Eyebrow */}
+        {/* Eyebrow pill — Flytrex style */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex items-center justify-center gap-2 mb-10"
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 mb-8 self-start"
         >
-          <span className="block w-8 h-px" style={{ background: "#FF5500" }} />
-          <span className="text-xs font-bold tracking-[0.25em] uppercase" style={{ color: "#FF5500" }}>
-            Drone Delivery · Now Operational
-          </span>
-          <span className="block w-8 h-px" style={{ background: "#FF5500" }} />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em]"
+            style={{ background: "rgba(255,85,0,0.12)", border: "1px solid rgba(255,85,0,0.25)", color: "#FF5500" }}>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#FF5500" }} />
+            Now Operational · 6 US Cities
+          </div>
         </motion.div>
 
-        {/* Headline */}
+        {/* Headline — PPRightGrotesk compressed style: all-caps, tight leading */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="font-black tracking-tight text-white leading-[0.95] mb-8"
-          style={{ fontSize: "clamp(3.5rem, 10vw, 9rem)", letterSpacing: "-0.03em" }}
+          className="font-black uppercase text-white leading-[0.88]"
+          style={{
+            fontSize: "clamp(4rem, 13vw, 13rem)",
+            letterSpacing: "-0.03em",
+            fontFamily: "'Space Grotesk', sans-serif",
+          }}
         >
-          The Sky Is<br />
-          <span style={{
-            background: "linear-gradient(90deg, #FF5500 0%, #FF8844 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}>
-            Your Courier.
-          </span>
+          Backyard<br />
+          <span style={{ color: "#FF5500" }}>Delivery.</span>
         </motion.h1>
 
-        {/* Subtitle */}
+        {/* Subline */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.7, delay: 0.4 }}
-          className="text-lg md:text-xl font-medium mb-12 mx-auto max-w-xl leading-relaxed"
+          className="mt-8 text-lg md:text-xl max-w-lg leading-relaxed"
           style={{ color: "rgba(255,255,255,0.45)" }}
         >
-          SpeedUp delivers anything, anywhere — in under 10 minutes.
-          Fully autonomous. Zero traffic. Zero emissions.
+          Drone delivery from your favorite local restaurants and stores, straight to your exact location — in under 10 minutes.
         </motion.p>
 
-        {/* CTAs */}
+        {/* CTAs — Flytrex button style */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.65 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="flex flex-col sm:flex-row gap-4 mt-12"
         >
           <button
-            className="flex items-center gap-2 px-8 py-4 rounded-full font-bold text-white text-[0.95rem] transition-all hover:opacity-90 hover:scale-[1.03]"
-            style={{ background: "#FF5500", boxShadow: "0 8px 32px rgba(255,85,0,0.4)" }}
+            onClick={() => scrollTo("simulation")}
+            className="flex items-center justify-center gap-2 font-bold uppercase tracking-[0.1em] rounded-full text-white transition-all hover:opacity-90 hover:scale-[1.03]"
+            style={{
+              padding: "1rem 2.5rem",
+              fontSize: "0.85rem",
+              background: "#FF5500",
+              boxShadow: "0 8px 32px rgba(255,85,0,0.4)",
+            }}
           >
-            Request a Demo <ArrowRight className="w-4 h-4" />
+            Get Early Access <ArrowRight className="w-4 h-4" />
           </button>
           <button
-            className="flex items-center gap-2 px-8 py-4 rounded-full font-bold text-[0.95rem] transition-all hover:bg-white/10"
-            style={{ color: "rgba(255,255,255,0.7)", border: "1.5px solid rgba(255,255,255,0.15)" }}
-            onClick={scrollToNext}
+            onClick={() => scrollTo("how-it-works")}
+            className="flex items-center justify-center gap-2 font-bold uppercase tracking-[0.1em] rounded-full transition-all hover:bg-white/8 hover:text-white"
+            style={{
+              padding: "1rem 2.5rem",
+              fontSize: "0.85rem",
+              color: "rgba(255,255,255,0.5)",
+              border: "1px solid rgba(255,255,255,0.15)",
+            }}
           >
-            See How It Works
+            How It Works
           </button>
         </motion.div>
 
-        {/* Trust row */}
+        {/* Stats row */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="flex flex-wrap items-center justify-center gap-8 mt-20"
+          transition={{ delay: 1.0 }}
+          className="mt-20 flex flex-wrap items-center gap-x-12 gap-y-6"
         >
           {[
-            { num: "< 10", unit: "min", label: "Avg delivery" },
-            { num: "100K+", unit: "", label: "Deliveries completed" },
+            { num: "< 10", unit: "min", label: "Average delivery" },
+            { num: "100K+", unit: "", label: "Deliveries flown" },
             { num: "6", unit: " cities", label: "Active in US" },
-            { num: "0", unit: "", label: "Safety incidents" },
+            { num: "0", unit: "", label: "Incidents" },
           ].map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="text-2xl font-black text-white">
-                {s.num}<span className="text-lg" style={{ color: "#FF5500" }}>{s.unit}</span>
+            <div key={s.label} className="flex flex-col">
+              <div className="text-3xl font-black text-white leading-none" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                {s.num}<span className="text-xl" style={{ color: "#FF5500" }}>{s.unit}</span>
               </div>
-              <div className="text-xs font-medium mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{s.label}</div>
+              <div className="text-xs font-semibold uppercase tracking-widest mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>
+                {s.label}
+              </div>
             </div>
           ))}
         </motion.div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.button
+      {/* Bottom scroll cue */}
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.4 }}
-        onClick={scrollToNext}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-opacity hover:opacity-60"
-        style={{ color: "rgba(255,255,255,0.3)" }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
       >
-        <span className="text-xs font-semibold tracking-widest uppercase">Scroll</span>
+        <span className="text-[9px] font-bold tracking-[0.3em] uppercase" style={{ color: "rgba(255,255,255,0.2)" }}>Scroll</span>
         <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-          className="w-px h-8 rounded-full"
-          style={{ background: "linear-gradient(180deg, rgba(255,85,0,0.6) 0%, transparent 100%)" }}
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          className="w-px h-10 rounded-full"
+          style={{ background: "linear-gradient(180deg, #FF5500 0%, transparent 100%)", opacity: 0.5 }}
         />
-      </motion.button>
+      </motion.div>
     </section>
   );
 }

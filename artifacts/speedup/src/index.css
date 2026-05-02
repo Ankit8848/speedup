@@ -57,39 +57,39 @@
 }
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222 20% 8%;
-  --border: 220 13% 91%;
-  --card: 0 0% 100%;
-  --card-foreground: 222 20% 8%;
-  --card-border: 220 13% 91%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 20% 8%;
-  --popover-border: 220 13% 91%;
+  --background: 222 84% 5%;
+  --foreground: 0 0% 98%;
+  --border: 222 30% 12%;
+  --card: 222 50% 7%;
+  --card-foreground: 0 0% 95%;
+  --card-border: 222 30% 12%;
+  --popover: 222 60% 6%;
+  --popover-foreground: 0 0% 95%;
+  --popover-border: 222 30% 12%;
   --primary: 21 100% 50%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 222 30% 8%;
-  --secondary-foreground: 0 0% 100%;
-  --muted: 220 14% 96%;
-  --muted-foreground: 220 9% 46%;
-  --accent: 22 100% 97%;
-  --accent-foreground: 21 100% 40%;
+  --secondary: 222 50% 10%;
+  --secondary-foreground: 0 0% 80%;
+  --muted: 222 40% 10%;
+  --muted-foreground: 222 15% 50%;
+  --accent: 222 40% 10%;
+  --accent-foreground: 21 100% 55%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --input: 220 13% 91%;
+  --input: 222 30% 12%;
   --ring: 21 100% 50%;
   --chart-1: 21 100% 50%;
-  --chart-2: 220 80% 35%;
+  --chart-2: 200 80% 50%;
   --chart-3: 142 70% 45%;
   --chart-4: 280 80% 55%;
   --chart-5: 340 80% 50%;
-  --sidebar: 0 0% 100%;
-  --sidebar-foreground: 222 20% 8%;
-  --sidebar-border: 220 13% 91%;
+  --sidebar: 222 70% 4%;
+  --sidebar-foreground: 0 0% 80%;
+  --sidebar-border: 222 30% 12%;
   --sidebar-primary: 21 100% 50%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 220 14% 96%;
-  --sidebar-accent-foreground: 222 20% 8%;
+  --sidebar-accent: 222 40% 10%;
+  --sidebar-accent-foreground: 0 0% 80%;
   --sidebar-ring: 21 100% 50%;
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: 'Space Grotesk', sans-serif;
@@ -108,17 +108,18 @@
   * { @apply border-border; }
   html { scroll-behavior: smooth; }
   body {
-    @apply font-sans antialiased bg-background text-foreground overflow-x-hidden;
+    @apply font-sans antialiased text-foreground overflow-x-hidden;
+    background: #010b19;
     cursor: none;
-    background: #0D0F14;
   }
-  h1, h2, h3, h4, h5, h6 { font-family: var(--font-serif); }
+  h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; }
 }
 
 @layer utilities {
   .glass-card {
-    @apply bg-white/5 backdrop-blur-md border border-white/10;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.07);
   }
-
-  input[type="search"]::-webkit-search-cancel-button { @apply hidden; }
+  input[type="search"]::-webkit-search-cancel-button { display: none; }
 }
