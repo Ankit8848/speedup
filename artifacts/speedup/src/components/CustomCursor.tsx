@@ -16,23 +16,16 @@ export function CustomCursor() {
   return (
     <>
       <motion.div
-        className="fixed top-0 left-0 w-4 h-4 bg-primary rounded-full pointer-events-none z-[9999] mix-blend-screen"
-        animate={{
-          x: mousePosition.x - 8,
-          y: mousePosition.y - 8,
-        }}
-        transition={{ type: "spring", stiffness: 500, damping: 28, mass: 2 }}
-        style={{
-          boxShadow: "0 0 20px rgba(0, 212, 255, 0.8)",
-        }}
+        className="fixed top-0 left-0 rounded-full pointer-events-none z-[9999]"
+        animate={{ x: mousePosition.x - 6, y: mousePosition.y - 6 }}
+        transition={{ type: "spring", stiffness: 800, damping: 40, mass: 0.5 }}
+        style={{ width: 12, height: 12, background: "#FF5500" }}
       />
       <motion.div
-        className="fixed top-0 left-0 w-12 h-12 border border-primary/50 rounded-full pointer-events-none z-[9998] mix-blend-screen"
-        animate={{
-          x: mousePosition.x - 24,
-          y: mousePosition.y - 24,
-        }}
-        transition={{ type: "spring", stiffness: 150, damping: 20, mass: 1 }}
+        className="fixed top-0 left-0 rounded-full pointer-events-none z-[9998] border-2"
+        animate={{ x: mousePosition.x - 20, y: mousePosition.y - 20 }}
+        transition={{ type: "spring", stiffness: 180, damping: 22, mass: 1 }}
+        style={{ width: 40, height: 40, borderColor: "#FF5500", opacity: 0.3 }}
       />
     </>
   );

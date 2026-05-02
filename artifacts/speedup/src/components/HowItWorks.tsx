@@ -1,93 +1,88 @@
 import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Smartphone, Rocket, PackageCheck } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const steps = [
+  {
+    icon: Smartphone,
+    step: "01",
+    title: "Place Your Order",
+    desc: "Open the app, choose your items, and confirm. Your order is instantly routed to the nearest SpeedUp hub.",
+    color: "#FF5500",
+  },
+  {
+    icon: Rocket,
+    step: "02",
+    title: "Autonomous Launch",
+    desc: "A drone is dispatched from the hub in under 30 seconds — no driver, no traffic, no delays.",
+    color: "#FF7722",
+  },
+  {
+    icon: PackageCheck,
+    step: "03",
+    title: "Precision Delivery",
+    desc: "Your package is gently lowered to your exact location via our smart winch system. Done in under 10 minutes.",
+    color: "#FF9944",
+  },
+];
+
 export function HowItWorks() {
   const sectionRef = useRef<HTMLElement>(null);
-  const stepsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!sectionRef.current || !stepsRef.current) return;
-
-    const steps = stepsRef.current.children;
-
+    if (!sectionRef.current) return;
     gsap.fromTo(
-      steps,
-      { opacity: 0, y: 50 },
+      ".hiw-card",
+      { opacity: 0, y: 40 },
       {
-        opacity: 1,
-        y: 0,
-        stagger: 0.3,
-        duration: 0.8,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 60%",
-        },
+        opacity: 1, y: 0, stagger: 0.2, duration: 0.7, ease: "power3.out",
+        scrollTrigger: { trigger: sectionRef.current, start: "top 65%" },
       }
     );
-
-    // Line animation
-    gsap.fromTo(
-      ".connection-line",
-      { scaleX: 0 },
-      {
-        scaleX: 1,
-        transformOrigin: "left center",
-        duration: 1.5,
-        ease: "power2.inOut",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 50%",
-        },
-      }
-    );
-
   }, []);
 
-  const steps = [
-    {
-      icon: Smartphone,
-      title: "Order Placed",
-      desc: "Instantly routed to the nearest hub.",
-    },
-    {
-      icon: Rocket,
-      title: "Autonomous Launch",
-      desc: "Drone deployed in under 30 seconds.",
-    },
-    {
-      icon: PackageCheck,
-      title: "Precision Drop",
-      desc: "Package lowered safely to your doorstep.",
-    },
-  ];
-
   return (
-    <section ref={sectionRef} className="py-32 bg-background relative" id="how-it-works">
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-20">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">How It Works</h2>
-          <div className="w-24 h-1 bg-primary mx-auto box-glow" />
+    <section ref={sectionRef} className="py-28 section-gray" id="how-it-works">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4"
+            style={{ background: "#FF550012", color: "#FF5500", border: "1px solid #FF550025" }}>
+            How It Works
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+            Order to door in <span style={{ color: "#FF5500" }}>3 steps</span>
+          </h2>
+          <p className="text-gray-500 text-lg max-w-xl mx-auto">
+            The simplest, fastest last-mile experience ever built.
+          </p>
         </div>
 
-        <div ref={stepsRef} className="flex flex-col md:flex-row justify-center items-center md:items-start gap-12 md:gap-8 relative">
-          {/* Desktop Connection Lines */}
-          <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-[2px] bg-border z-0">
-            <div className="connection-line w-full h-full bg-primary box-glow" />
-          </div>
+        {/* Steps */}
+        <div className="grid md:grid-cols-3 gap-8 relative">
+          {/* Connector line */}
+          <div className="hidden md:block absolute top-16 left-1/6 right-1/6 h-px"
+            style={{ background: "linear-gradient(90deg, #FF5500, #FF9944)" }} />
 
-          {steps.map((step, idx) => (
-            <div key={idx} className="relative z-10 flex flex-col items-center text-center max-w-xs w-full">
-              <div className="w-24 h-24 rounded-full glass-card flex items-center justify-center mb-6 relative group box-glow-hover transition-all duration-300">
-                <step.icon className="w-10 h-10 text-primary group-hover:text-secondary transition-colors" />
-                <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping opacity-20" />
+          {steps.map((step) => (
+            <div key={step.step} className="hiw-card relative">
+              <div className="bg-white rounded-3xl p-8 card-shadow hover:card-shadow-lg transition-all duration-300 group hover:-translate-y-1 text-center">
+                {/* Step number */}
+                <div className="text-xs font-black tracking-widest mb-5" style={{ color: step.color }}>
+                  STEP {step.step}
+                </div>
+                {/* Icon */}
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transition-transform duration-300 group-hover:scale-110"
+                  style={{ background: step.color + "12" }}>
+                  <step.icon className="w-9 h-9" style={{ color: step.color }} />
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-3">{step.title}</h3>
+                <p className="text-gray-500 leading-relaxed">{step.desc}</p>
               </div>
-              <h3 className="text-xl font-bold mb-2 text-foreground">{step.title}</h3>
-              <p className="text-muted-foreground">{step.desc}</p>
             </div>
           ))}
         </div>
