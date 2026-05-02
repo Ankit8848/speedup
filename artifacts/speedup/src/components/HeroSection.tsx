@@ -1,204 +1,259 @@
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Zap, Shield, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
-function DroneSVG() {
+/* ─── Bezier math ─────────────────────────── */
+function bez(t: number, p0: [number, number], p1: [number, number], p2: [number, number]): [number, number] {
+  const m = 1 - t;
+  return [m*m*p0[0]+2*m*t*p1[0]+t*t*p2[0], m*m*p0[1]+2*m*t*p1[1]+t*t*p2[1]];
+}
+
+const HUB:  [number,number] = [44, 172];
+const CTRL: [number,number] = [172, 50];
+const DEST: [number,number] = [296, 138];
+
+/* ─── Live Delivery Tracker ───────────────── */
+function FlightTracker() {
+  const [t, setT] = useState(0.28);
+  const rafRef = useRef<number>(0);
+  const lastRef = useRef(0);
+
+  useEffect(() => {
+    const tick = (now: number) => {
+      const dt = Math.min((now - lastRef.current) / 1000, 0.05);
+      lastRef.current = now;
+      setT(p => { const n = p + dt * 0.055; return n >= 1 ? 0.02 : n; });
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const [dx, dy] = bez(t, HUB, CTRL, DEST);
+
+  /* trail polyline */
+  const TRAIL_STEPS = 30;
+  const numPts = Math.max(2, Math.round(t * TRAIL_STEPS));
+  const trailD = Array.from({ length: numPts }, (_, i) => {
+    const s = (i / (numPts - 1)) * t;
+    const [x, y] = bez(s, HUB, CTRL, DEST);
+    return `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
+  }).join(" ");
+
+  const eta  = Math.max(0, Math.round((1 - t) * 9));
+  const spd  = 112 + Math.round(Math.sin(t * 60) * 6);
+  const pct  = Math.round(t * 100);
+
   return (
-    <motion.svg
-      viewBox="0 0 320 320"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
-      animate={{ y: [-10, 10, -10] }}
-      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-    >
-      {/* Outer glow ring */}
-      <circle cx="160" cy="160" r="140" fill="none" stroke="rgba(255,85,0,0.08)" strokeWidth="1" />
-      <circle cx="160" cy="160" r="115" fill="none" stroke="rgba(255,85,0,0.05)" strokeWidth="1" />
-      <circle cx="160" cy="160" r="90" fill="none" stroke="rgba(255,85,0,0.10)" strokeWidth="0.5" strokeDasharray="4 4" />
+    <div style={{
+      borderRadius: 24, background: "#fff", overflow: "hidden", width: 340, flexShrink: 0,
+      boxShadow: "0 32px 80px rgba(0,0,0,0.13), 0 8px 24px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05)",
+    }}>
+      {/* Header */}
+      <div style={{ background: "#FF5500", padding: "13px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "white" }} className="animate-pulse" />
+          <span style={{ color: "white", fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase" }}>Live Delivery</span>
+        </div>
+        <span style={{ color: "rgba(255,255,255,0.55)", fontSize: 10, fontWeight: 700, fontFamily: "monospace" }}>SU-4829</span>
+      </div>
 
-      {/* Rotor arms */}
-      <line x1="160" y1="160" x2="82" y2="82" stroke="rgba(10,15,30,0.18)" strokeWidth="3" strokeLinecap="round"/>
-      <line x1="160" y1="160" x2="238" y2="82" stroke="rgba(10,15,30,0.18)" strokeWidth="3" strokeLinecap="round"/>
-      <line x1="160" y1="160" x2="82" y2="238" stroke="rgba(10,15,30,0.18)" strokeWidth="3" strokeLinecap="round"/>
-      <line x1="160" y1="160" x2="238" y2="238" stroke="rgba(10,15,30,0.18)" strokeWidth="3" strokeLinecap="round"/>
+      {/* Map */}
+      <div style={{ background: "#F7F9FC" }}>
+        <svg width="340" height="188" viewBox="0 0 340 188" style={{ display: "block" }}>
+          {/* Street grid */}
+          {[50,100,150,200,250,300].map(x => <line key={`v${x}`} x1={x} y1={0} x2={x} y2={188} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>)}
+          {[40,80,120,160].map(y => <line key={`h${y}`} x1={0} y1={y} x2={340} y2={y} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>)}
+          {/* City blocks */}
+          <rect x="58"  y="48"  width="32" height="18" rx="3" fill="rgba(0,0,0,0.05)"/>
+          <rect x="108" y="28"  width="42" height="24" rx="3" fill="rgba(0,0,0,0.04)"/>
+          <rect x="168" y="88"  width="36" height="20" rx="3" fill="rgba(0,0,0,0.05)"/>
+          <rect x="218" y="48"  width="28" height="32" rx="3" fill="rgba(0,0,0,0.04)"/>
+          <rect x="138" y="128" width="32" height="20" rx="3" fill="rgba(0,0,0,0.05)"/>
+          <rect x="68"  y="118" width="36" height="16" rx="3" fill="rgba(0,0,0,0.04)"/>
+          <rect x="248" y="98"  width="28" height="24" rx="3" fill="rgba(0,0,0,0.05)"/>
+          <rect x="88"  y="78"  width="20" height="28" rx="3" fill="rgba(0,0,0,0.04)"/>
+          <rect x="185" y="130" width="40" height="18" rx="3" fill="rgba(0,0,0,0.04)"/>
+          {/* Planned route */}
+          <path d="M 44 172 Q 172 50 296 138" fill="none" stroke="rgba(255,85,0,0.18)" strokeWidth="2" strokeDasharray="5 4"/>
+          {/* Flown trail */}
+          {numPts > 1 && <path d={trailD} fill="none" stroke="#FF5500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>}
+          {/* Hub */}
+          <circle cx={44}  cy={172} r={14} fill="rgba(255,85,0,0.12)"/>
+          <circle cx={44}  cy={172} r={6}  fill="#FF5500"/>
+          <circle cx={44}  cy={172} r={2.5} fill="white"/>
+          <text x={44} y={162} textAnchor="middle" fill="#FF5500" fontSize="7" fontWeight="800" fontFamily="sans-serif">HUB</text>
+          {/* Destination */}
+          <circle cx={296} cy={138} r={14} fill="rgba(22,163,74,0.12)"/>
+          <circle cx={296} cy={138} r={6}  fill="#16A34A"/>
+          <circle cx={296} cy={138} r={2.5} fill="white"/>
+          <text x={296} y={128} textAnchor="middle" fill="#16A34A" fontSize="7" fontWeight="800" fontFamily="sans-serif">YOU</text>
+          {/* Drone glow */}
+          <circle cx={dx} cy={dy} r={16} fill="rgba(255,85,0,0.18)"/>
+          <circle cx={dx} cy={dy} r={8}  fill="#FF5500"/>
+          <circle cx={dx} cy={dy} r={3}  fill="white"/>
+        </svg>
+      </div>
 
-      {/* Rotor hubs */}
-      {[{cx:82,cy:82},{cx:238,cy:82},{cx:82,cy:238},{cx:238,cy:238}].map((pos, i) => (
-        <g key={i}>
-          <circle cx={pos.cx} cy={pos.cy} r="22" fill="rgba(255,85,0,0.05)" stroke="rgba(255,85,0,0.20)" strokeWidth="1"/>
-          <circle cx={pos.cx} cy={pos.cy} r="6" fill="#FF5500" opacity="0.9"/>
-          <motion.g
-            style={{ originX: `${pos.cx}px`, originY: `${pos.cy}px` }}
-            animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
-            transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-          >
-            <ellipse cx={pos.cx} cy={pos.cy} rx="18" ry="4" fill="rgba(10,15,30,0.12)" />
-          </motion.g>
-        </g>
-      ))}
+      {/* Telemetry row */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+        {[
+          { l: "ETA",      v: eta === 0 ? "Arrived!" : `${eta} min`, hi: true },
+          { l: "Speed",    v: `${spd} km/h`, hi: false },
+          { l: "Progress", v: `${pct}%`,     hi: false },
+        ].map((item, i) => (
+          <div key={i} style={{ padding: "10px 0", textAlign: "center", borderLeft: i > 0 ? "1px solid rgba(0,0,0,0.06)" : "none" }}>
+            <div style={{ fontSize: 9, color: "#9CA3AF", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>{item.l}</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: item.hi ? "#FF5500" : "#0A0F1E", fontFamily: "'Space Grotesk', sans-serif" }}>{item.v}</div>
+          </div>
+        ))}
+      </div>
 
-      {/* Main body */}
-      <rect x="130" y="130" width="60" height="60" rx="12" fill="#F1F4FA" stroke="rgba(10,15,30,0.12)" strokeWidth="1.5"/>
-      <rect x="138" y="138" width="44" height="44" rx="8" fill="#FF5500" opacity="0.10"/>
-
-      {/* Center LED */}
-      <circle cx="160" cy="160" r="12" fill="#FF5500" opacity="0.9">
-        <animate attributeName="opacity" values="0.9;0.5;0.9" dur="1.5s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="160" cy="160" r="5" fill="white"/>
-
-      {/* Camera gimbal */}
-      <rect x="148" y="178" width="24" height="14" rx="6" fill="rgba(10,15,30,0.06)" stroke="rgba(10,15,30,0.12)" strokeWidth="1"/>
-      <circle cx="160" cy="185" r="4" fill="rgba(10,15,30,0.10)" stroke="rgba(10,15,30,0.15)" strokeWidth="0.8"/>
-
-      {/* Landing legs */}
-      <line x1="142" y1="190" x2="136" y2="206" stroke="rgba(10,15,30,0.15)" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="178" y1="190" x2="184" y2="206" stroke="rgba(10,15,30,0.15)" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="130" y1="206" x2="142" y2="206" stroke="rgba(10,15,30,0.15)" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="178" y1="206" x2="190" y2="206" stroke="rgba(10,15,30,0.15)" strokeWidth="1.5" strokeLinecap="round"/>
-
-      {/* Signal rings */}
-      <motion.circle cx="160" cy="160" r="70" fill="none" stroke="#FF5500" strokeWidth="0.8"
-        animate={{ scale: [1, 1.7], opacity: [0.25, 0] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
-        style={{ originX: "160px", originY: "160px" }}
-      />
-      <motion.circle cx="160" cy="160" r="70" fill="none" stroke="#FF5500" strokeWidth="0.8"
-        animate={{ scale: [1, 1.7], opacity: [0.15, 0] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut", delay: 0.8 }}
-        style={{ originX: "160px", originY: "160px" }}
-      />
-
-      {/* Speed lines */}
-      <motion.g animate={{ opacity: [0.25, 0.06, 0.25] }} transition={{ duration: 2, repeat: Infinity }}>
-        <line x1="100" y1="270" x2="220" y2="270" stroke="#FF5500" strokeWidth="1" strokeLinecap="round" opacity="0.3"/>
-        <line x1="110" y1="278" x2="210" y2="278" strokeWidth="1" stroke="#FF5500" strokeLinecap="round" opacity="0.15"/>
-      </motion.g>
-    </motion.svg>
+      {/* Order card */}
+      <div style={{ padding: "12px 16px 16px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ width: 40, height: 40, borderRadius: 12, background: "#FFF5F0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🍕</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#0A0F1E", marginBottom: 6 }}>Marco's Pizzeria</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ flex: 1, height: 4, borderRadius: 2, background: "rgba(0,0,0,0.08)", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${pct}%`, background: "#FF5500", borderRadius: 2, transition: "width 0.08s linear" }}/>
+            </div>
+            <span style={{ fontSize: 10, fontWeight: 700, color: "#FF5500", flexShrink: 0 }}>{pct}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function FloatingCard({ icon: Icon, label, value, color, delay, style }: {
-  icon: React.FC<any>; label: string; value: string; color: string; delay: number; style: React.CSSProperties;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay, duration: 0.5 }}
-      className="absolute flex items-center gap-3 px-4 py-3 rounded-2xl backdrop-blur-sm pointer-events-none"
-      style={{
-        background: "rgba(255,255,255,0.95)",
-        border: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
-        ...style,
-      }}
-    >
-      <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-        style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
-        <Icon className="w-4 h-4" style={{ color }} />
-      </div>
-      <div>
-        <div className="text-xs font-bold leading-none" style={{ color: "#0A0F1E" }}>{value}</div>
-        <div className="text-[10px] mt-0.5 font-medium" style={{ color: "#8892A4" }}>{label}</div>
-      </div>
-    </motion.div>
-  );
-}
-
+/* ─── Section ─────────────────────────────── */
 export function HeroSection() {
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <section
-      id="hero"
-      className="relative w-full overflow-hidden"
-      style={{ minHeight: "100dvh", background: "#FFFFFF" }}
-    >
-      {/* Subtle dot grid */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        backgroundImage: `radial-gradient(circle, rgba(10,15,30,0.06) 1px, transparent 1px)`,
-        backgroundSize: "32px 32px",
-      }} />
+    <section id="hero" className="relative w-full overflow-hidden" style={{ minHeight: "100dvh", background: "#FFFFFF" }}>
 
-      {/* Soft orange glow top-right */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(255,85,0,0.06) 0%, transparent 65%)" }} />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(255,85,0,0.04) 0%, transparent 65%)" }} />
+      {/* Background: fine city-grid */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        <svg width="100%" height="100%">
+          <defs>
+            <pattern id="hg" width="64" height="64" patternUnits="userSpaceOnUse">
+              <path d="M 64 0 L 0 0 0 64" fill="none" stroke="rgba(10,15,30,0.04)" strokeWidth="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#hg)"/>
+        </svg>
+      </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 w-full min-h-dvh flex items-center">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-6 items-center w-full pt-36 pb-24">
+      {/* Warm glow — right */}
+      <div className="absolute top-0 right-0 pointer-events-none" style={{
+        width: "55%", height: "90%",
+        background: "radial-gradient(ellipse at 65% 25%, rgba(255,85,0,0.055) 0%, transparent 60%)",
+      }}/>
+      {/* Cool glow — left bottom */}
+      <div className="absolute bottom-0 left-0 pointer-events-none" style={{
+        width: "35%", height: "50%",
+        background: "radial-gradient(ellipse at 20% 80%, rgba(37,99,235,0.04) 0%, transparent 65%)",
+      }}/>
 
-          {/* LEFT — copy */}
-          <div>
-            {/* Eyebrow pill */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 mb-8">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em]"
-                style={{ background: "rgba(255,85,0,0.10)", border: "1px solid rgba(255,85,0,0.25)", color: "#FF5500" }}>
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#FF5500" }} />
-                Now Operational · 6 US Cities
+      {/* Content wrapper */}
+      <div className="relative z-10 max-w-[88rem] mx-auto px-6 lg:px-10 w-full min-h-dvh flex items-center">
+        <div className="w-full grid lg:grid-cols-[1fr_auto] gap-16 items-center pt-36 pb-24">
+
+          {/* ── LEFT — Copy ──────────────────── */}
+          <div className="min-w-0">
+
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 mb-10"
+            >
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full"
+                style={{ background: "rgba(255,85,0,0.09)", border: "1px solid rgba(255,85,0,0.22)" }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#FF5500" }}/>
+                <span style={{ color: "#FF5500", fontSize: 10, fontWeight: 800, letterSpacing: "0.22em", textTransform: "uppercase" }}>
+                  Now Operational · 6 US Cities
+                </span>
               </div>
             </motion.div>
 
-            {/* Headline */}
+            {/* ── Headline ── */}
             <motion.h1
-              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="font-black uppercase leading-[0.88]"
-              style={{ fontSize: "clamp(3.5rem, 9vw, 8.5rem)", letterSpacing: "-0.03em", fontFamily: "'Space Grotesk', sans-serif", color: "#0A0F1E" }}
+              initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.85, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif", fontWeight: 900,
+                fontSize: "clamp(4rem, 10vw, 10.5rem)", lineHeight: 0.88,
+                letterSpacing: "-0.04em", textTransform: "uppercase", color: "#0A0F1E",
+                marginBottom: "1.75rem",
+              }}
             >
-              Backyard<br />
-              <span style={{ color: "#FF5500" }}>Delivery.</span>
+              Backyard<br/>
+              <span style={{ color: "#FF5500", display: "inline-block" }}>Delivery.</span><br/>
+              Reinvented.
             </motion.h1>
 
-            {/* Subline */}
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.4 }}
-              className="mt-6 text-base md:text-lg leading-relaxed max-w-md"
-              style={{ color: "#6B7280" }}>
-              From your favorite restaurants and stores to your exact backyard — fully autonomous, under 10 minutes, zero traffic.
+            {/* Subhead */}
+            <motion.p
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.7 }}
+              style={{ color: "#6B7280", fontSize: "1.125rem", lineHeight: 1.7, maxWidth: "34rem", marginBottom: "2.5rem" }}
+            >
+              Fully autonomous drones deliver from your favorite restaurants and stores to your exact backyard —
+              under 10 minutes, zero traffic, every time.
             </motion.p>
 
             {/* CTAs */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.65 }}
-              className="flex flex-col sm:flex-row gap-3 mt-10">
-              <button onClick={() => scrollTo("simulation")}
-                className="flex items-center justify-center gap-2 font-bold uppercase tracking-[0.1em] rounded-full text-white transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
-                style={{ padding: "0.9rem 2rem", fontSize: "0.8rem", background: "#FF5500", boxShadow: "0 8px 32px rgba(255,85,0,0.30)" }}>
-                Get Early Access <ArrowRight className="w-4 h-4" />
-              </button>
-              <button onClick={() => scrollTo("how-it-works")}
-                className="flex items-center justify-center gap-2 font-bold uppercase tracking-[0.1em] rounded-full transition-all"
-                style={{ padding: "0.9rem 2rem", fontSize: "0.8rem", color: "#4B5675", border: "1px solid rgba(0,0,0,0.15)" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.3)"; (e.currentTarget as HTMLElement).style.color = "#0A0F1E"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.15)"; (e.currentTarget as HTMLElement).style.color = "#4B5675"; }}
+            <motion.div
+              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="flex flex-wrap gap-3"
+            >
+              <button
+                onClick={() => scrollTo("simulation")}
+                className="inline-flex items-center gap-2 text-white font-black uppercase transition-all hover:scale-[1.03] active:scale-[0.98]"
+                style={{
+                  padding: "1rem 2.25rem", borderRadius: 100, border: "none", cursor: "pointer",
+                  fontSize: "0.78rem", letterSpacing: "0.14em",
+                  background: "#FF5500",
+                  boxShadow: "0 8px 32px rgba(255,85,0,0.38), 0 2px 8px rgba(255,85,0,0.20)",
+                }}
               >
-                See How It Works
+                Get Early Access <ArrowRight size={15}/>
+              </button>
+              <button
+                onClick={() => scrollTo("how-it-works")}
+                className="inline-flex items-center gap-2 font-bold uppercase transition-all hover:border-black/30 hover:text-[#0A0F1E]"
+                style={{
+                  padding: "1rem 2.25rem", borderRadius: 100, border: "1.5px solid rgba(0,0,0,0.14)", cursor: "pointer",
+                  fontSize: "0.78rem", letterSpacing: "0.12em", color: "#4B5675", background: "transparent",
+                }}
+              >
+                How It Works
               </button>
             </motion.div>
 
-            {/* Trust signals */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }}
-              className="mt-10 pt-8 flex flex-wrap gap-x-8 gap-y-4"
-              style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+            {/* Trust strip */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.95 }}
+              className="flex flex-wrap gap-x-10 gap-y-4 mt-12 pt-10"
+              style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
+            >
               {[
-                { num: "<10", unit: "min", label: "Avg delivery" },
-                { num: "100K+", unit: "", label: "Deliveries flown" },
-                { num: "0", unit: "", label: "Incidents to date" },
-              ].map((s) => (
-                <div key={s.label} className="flex flex-col">
-                  <div className="text-2xl font-black leading-none"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#0A0F1E" }}>
-                    {s.num}<span style={{ color: "#FF5500" }}>{s.unit}</span>
+                { val: "<10", suf: "min", label: "Avg delivery time" },
+                { val: "100K+", suf: "", label: "Deliveries flown" },
+                { val: "0",    suf: "", label: "Incidents to date" },
+                { val: "FAA",  suf: "", label: "Part 135 certified" },
+              ].map(s => (
+                <div key={s.label}>
+                  <div style={{
+                    fontFamily: "'Space Grotesk', sans-serif", fontWeight: 900,
+                    fontSize: "1.65rem", lineHeight: 1, letterSpacing: "-0.03em", color: "#0A0F1E"
+                  }}>
+                    {s.val}<span style={{ color: "#FF5500" }}>{s.suf}</span>
                   </div>
-                  <div className="text-[10px] font-semibold uppercase tracking-widest mt-1"
-                    style={{ color: "#9CA3AF" }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.16em", color: "#9CA3AF", marginTop: 5 }}>
                     {s.label}
                   </div>
                 </div>
@@ -206,73 +261,62 @@ export function HeroSection() {
             </motion.div>
           </div>
 
-          {/* RIGHT — drone visual */}
+          {/* ── RIGHT — Live tracker ─────────── */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="relative hidden lg:flex items-center justify-center"
-            style={{ height: "520px" }}
+            initial={{ opacity: 0, x: 40, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 1.1, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="relative hidden lg:flex flex-col items-center gap-4"
           >
-            <div className="w-[380px] h-[380px]">
-              <DroneSVG />
-            </div>
+            {/* Ambient glow */}
+            <div className="absolute -inset-12 pointer-events-none" style={{
+              background: "radial-gradient(ellipse at 50% 50%, rgba(255,85,0,0.07) 0%, transparent 60%)",
+            }}/>
 
-            {/* Floating data cards */}
-            <FloatingCard icon={Zap} label="Flight speed" value="120 km/h" color="#FF5500" delay={0.9}
-              style={{ top: "8%", left: "-5%" }} />
-            <FloatingCard icon={Shield} label="Safety record" value="100% Safe" color="#16A34A" delay={1.1}
-              style={{ top: "20%", right: "-2%" }} />
-            <FloatingCard icon={MapPin} label="Precision drop" value="±10 cm" color="#2563EB" delay={1.3}
-              style={{ bottom: "18%", left: "-4%" }} />
-
-            {/* Live delivery card */}
+            {/* Top chip */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.5 }}
-              className="absolute bottom-8 right-0 rounded-2xl p-4"
-              style={{
-                background: "rgba(255,255,255,0.97)",
-                border: "1px solid rgba(0,0,0,0.08)",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
-                minWidth: "190px",
-              }}
+              initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }}
+              className="self-start ml-8 flex items-center gap-2.5 px-4 py-2.5 rounded-full"
+              style={{ background: "white", boxShadow: "0 4px 24px rgba(0,0,0,0.09)", border: "1px solid rgba(0,0,0,0.06)", fontSize: 11, fontWeight: 700, color: "#0A0F1E" }}
             >
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#16A34A" }} />
-                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#16A34A" }}>Live Delivery</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
-                  style={{ background: "rgba(255,85,0,0.10)" }}>🍕</div>
-                <div>
-                  <div className="text-xs font-bold" style={{ color: "#0A0F1E" }}>Marco's Pizza</div>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <div className="h-1 rounded-full overflow-hidden flex-1"
-                      style={{ background: "rgba(0,0,0,0.08)", minWidth: "80px" }}>
-                      <motion.div className="h-full rounded-full"
-                        style={{ background: "#FF5500" }}
-                        animate={{ width: ["20%", "80%"] }}
-                        transition={{ duration: 8, ease: "linear", repeat: Infinity }} />
-                    </div>
-                    <span className="text-[10px] shrink-0" style={{ color: "#9CA3AF" }}>~4 min</span>
-                  </div>
-                </div>
-              </div>
+              ⚡ <span>Cruise speed: 120 km/h</span>
             </motion.div>
+
+            <FlightTracker />
+
+            {/* Bottom chips */}
+            <div className="flex gap-2">
+              {[
+                "🛡 FAA Part 135",
+                "📍 ±10 cm precision",
+                "🔋 100% renewable",
+              ].map(chip => (
+                <motion.div
+                  key={chip}
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.15 }}
+                  className="px-3.5 py-2 rounded-full text-xs font-bold"
+                  style={{ background: "white", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", border: "1px solid rgba(0,0,0,0.06)", color: "#4B5675" }}
+                >
+                  {chip}
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
+
         </div>
       </div>
 
-      {/* Scroll cue */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-        <span className="text-[9px] font-bold tracking-[0.3em] uppercase"
-          style={{ color: "#C4CBD8" }}>Scroll</span>
-        <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          className="w-px h-10 rounded-full"
-          style={{ background: "linear-gradient(180deg, #FF5500 0%, transparent 100%)", opacity: 0.6 }} />
+      {/* Scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.2 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none"
+      >
+        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: "#C4CBD8" }}>Scroll</span>
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          style={{ width: 1, height: 40, background: "linear-gradient(180deg, #FF5500 0%, transparent 100%)", opacity: 0.55 }}
+        />
       </motion.div>
     </section>
   );
