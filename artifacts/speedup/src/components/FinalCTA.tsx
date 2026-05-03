@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Building2, Users, Rocket } from "lucide-react";
+import { useLocation } from "wouter";
 
 const cards = [
   {
@@ -8,6 +9,7 @@ const cards = [
     headline: "Cut your delivery costs in half.",
     desc: "No driver fleet, no tips, no logistics overhead. SpeedUp charges a flat fee per delivery and handles everything from launch to landing.",
     cta: "Explore Business Plans",
+    href: "/for-business",
     color: "#FF5500",
     bg: "#FFF5F0",
     border: "rgba(255,85,0,0.15)",
@@ -18,6 +20,7 @@ const cards = [
     headline: "Your neighborhood, delivered fast.",
     desc: "Sign up for early access in your city and get notified when SpeedUp goes live within 2 km of your address.",
     cta: "Join the Waitlist",
+    href: "/locations",
     color: "#2563EB",
     bg: "#EFF6FF",
     border: "rgba(37,99,235,0.15)",
@@ -28,6 +31,7 @@ const cards = [
     headline: "The future of last-mile logistics.",
     desc: "We've proven the model. Now we're scaling to 100 cities by 2027. See our traction, unit economics, and roadmap.",
     cta: "View Investor Deck",
+    href: "/technology",
     color: "#16A34A",
     bg: "#F0FDF4",
     border: "rgba(22,163,74,0.15)",
@@ -35,17 +39,15 @@ const cards = [
 ];
 
 export function FinalCTA() {
+  const [, navigate] = useLocation();
+
   return (
     <section className="relative overflow-hidden"
       style={{ background: "#FFFFFF", padding: "9rem 0", borderTop: "1px solid rgba(0,0,0,0.07)" }}>
-
-      {/* Very subtle warm tint at top */}
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(255,85,0,0.03) 0%, transparent 50%)" }} />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
-
-        {/* Label */}
         <div className="flex items-center gap-3 mb-12">
           <span className="w-8 h-px" style={{ background: "#FF5500" }} />
           <span className="text-[10px] font-bold tracking-[0.25em] uppercase" style={{ color: "#FF5500" }}>
@@ -53,7 +55,6 @@ export function FinalCTA() {
           </span>
         </div>
 
-        {/* Massive headline */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -80,16 +81,17 @@ export function FinalCTA() {
           </p>
         </motion.div>
 
-        {/* Three cards */}
         <div className="grid md:grid-cols-3 gap-4 mb-20">
           {cards.map((card, idx) => (
-            <motion.div
+            <motion.button
               key={idx}
+              type="button"
+              onClick={() => navigate(card.href)}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1, duration: 0.6 }}
-              className="group rounded-2xl p-8 flex flex-col relative overflow-hidden transition-all duration-300 hover:-translate-y-1"
+              className="group rounded-2xl p-8 flex flex-col relative overflow-hidden transition-all duration-300 hover:-translate-y-1 text-left"
               style={{ background: card.bg, border: `1px solid ${card.border}`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
             >
               <div className="absolute top-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -106,15 +108,14 @@ export function FinalCTA() {
                 style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#0A0F1E" }}>{card.headline}</h3>
               <p className="text-sm leading-relaxed mb-8 flex-1" style={{ color: "#6B7280" }}>{card.desc}</p>
 
-              <button className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.15em] transition-all group-hover:gap-3"
+              <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.15em] transition-all group-hover:gap-3"
                 style={{ color: card.color }}>
                 {card.cta} <ArrowRight className="w-3.5 h-3.5 transition-all" />
-              </button>
-            </motion.div>
+              </span>
+            </motion.button>
           ))}
         </div>
 
-        {/* Full-width CTA strip */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -138,11 +139,15 @@ export function FinalCTA() {
 
           <div className="relative z-10 flex flex-col sm:flex-row gap-3 shrink-0">
             <button
+              type="button"
+              onClick={() => navigate("/for-business")}
               className="flex items-center gap-2 font-bold uppercase tracking-[0.1em] rounded-full transition-all hover:opacity-90 hover:scale-[1.02]"
               style={{ padding: "1rem 2rem", fontSize: "0.8rem", background: "white", color: "#FF5500", boxShadow: "0 8px 32px rgba(0,0,0,0.15)" }}>
               Schedule a Demo <ArrowRight className="w-4 h-4" />
             </button>
             <button
+              type="button"
+              onClick={() => navigate("/technology")}
               className="flex items-center gap-2 font-bold uppercase tracking-[0.1em] rounded-full transition-all"
               style={{ padding: "1rem 2rem", fontSize: "0.8rem", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.35)" }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.65)"}
@@ -153,7 +158,6 @@ export function FinalCTA() {
           </div>
         </motion.div>
 
-        {/* Footer cities row */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
