@@ -147,7 +147,7 @@ export function FinalCTA() {
             </button>
             <button
               type="button"
-              onClick={() => navigate("/technology")}
+              onClick={() => navigate("/pricing")}
               className="flex items-center gap-2 font-bold uppercase tracking-[0.1em] rounded-full transition-all"
               style={{ padding: "1rem 2rem", fontSize: "0.8rem", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.35)" }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.65)"}

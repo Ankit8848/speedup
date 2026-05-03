@@ -7,6 +7,7 @@ const PRODUCT_LINKS = [
   { label: "Safety Record", href: "/safety" },
   { label: "Service Areas", href: "/locations" },
   { label: "For Business", href: "/for-business" },
+  { label: "Pricing", href: "/pricing" },
 ];
 
 const COMPANY_LINKS = ["About Us", "Newsroom", "Careers", "Investor Relations", "Contact"];

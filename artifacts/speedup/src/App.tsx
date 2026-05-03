@@ -9,6 +9,7 @@ import TechnologyPage from "@/pages/TechnologyPage";
 import SafetyPage from "@/pages/SafetyPage";
 import LocationsPage from "@/pages/LocationsPage";
 import ForBusinessPage from "@/pages/ForBusinessPage";
+import PricingPage from "@/pages/PricingPage";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/safety" component={SafetyPage} />
       <Route path="/locations" component={LocationsPage} />
       <Route path="/for-business" component={ForBusinessPage} />
+      <Route path="/pricing" component={PricingPage} />
       <Route component={NotFound} />
     </Switch>
   );

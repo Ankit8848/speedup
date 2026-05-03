@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useLocation } from "wouter";
 
 /* ─── Bezier math ─────────────────────────── */
 function bez(t: number, p0: [number, number], p1: [number, number], p2: [number, number]): [number, number] {
@@ -128,7 +129,7 @@ function FlightTracker() {
 
 /* ─── Section ─────────────────────────────── */
 export function HeroSection() {
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const [, navigate] = useLocation();
 
   return (
     <section id="hero" className="relative w-full overflow-hidden" style={{ minHeight: "100dvh", background: "#FFFFFF" }}>
@@ -211,7 +212,7 @@ export function HeroSection() {
               className="flex flex-wrap gap-3"
             >
               <button
-                onClick={() => scrollTo("simulation")}
+                onClick={() => navigate("/for-business")}
                 className="inline-flex items-center gap-2 text-white font-black uppercase transition-all hover:scale-[1.03] active:scale-[0.98]"
                 style={{
                   padding: "1rem 2.25rem", borderRadius: 100, border: "none", cursor: "pointer",
@@ -223,7 +224,7 @@ export function HeroSection() {
                 Get Early Access <ArrowRight size={15}/>
               </button>
               <button
-                onClick={() => scrollTo("how-it-works")}
+                onClick={() => navigate("/how-it-works")}
                 className="inline-flex items-center gap-2 font-bold uppercase transition-all hover:border-black/30 hover:text-[#0A0F1E]"
                 style={{
                   padding: "1rem 2.25rem", borderRadius: 100, border: "1.5px solid rgba(0,0,0,0.14)", cursor: "pointer",
