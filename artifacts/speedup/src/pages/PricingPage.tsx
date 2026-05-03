@@ -383,31 +383,6 @@ export default function PricingPage() {
             style={{ background: "#F7F9FC", border: "1px solid rgba(0,0,0,0.07)" }}
           >
             <div className="grid md:grid-cols-4 gap-8">
-              {[
-                { label: "Per-delivery cost", consumer: "~$3.99", business: "$2.49", enterprise: "Volume pricing" },
-                { label: "Avg delivery time", consumer: "< 10 min", business: "< 10 min", enterprise: "< 10 min" },
-                { label: "Real-time tracking", consumer: "✓", business: "✓", enterprise: "✓" },
-                { label: "API access", consumer: "—", business: "✓", enterprise: "✓" },
-                { label: "Dedicated fleet", consumer: "—", business: "✓", enterprise: "✓" },
-                { label: "24/7 support", consumer: "—", business: "✓", enterprise: "Dedicated team" },
-                { label: "SLA guarantee", consumer: "—", business: "99.5%", enterprise: "Custom" },
-                { label: "White-label HUD", consumer: "—", business: "Add-on", enterprise: "✓" },
-              ].map((row, i) => (
-                <div key={i} className={i === 0 ? "" : "md:col-start-auto"} style={{ display: "contents" }}>
-                  {i === 0 && (
-                    <>
-                      <div />
-                      {["Consumer", "Business", "Enterprise"].map(h => (
-                        <div key={h} className="text-[11px] font-black uppercase tracking-[0.15em] mb-4 pb-4"
-                          style={{ color: h === "Business" ? "#FF5500" : "#9CA3AF", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-                          {h}
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
-              ))}
-
               {/* header row */}
               <div />
               {["Consumer", "Business", "Enterprise"].map(h => (

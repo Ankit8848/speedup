@@ -10,6 +10,7 @@ import SafetyPage from "@/pages/SafetyPage";
 import LocationsPage from "@/pages/LocationsPage";
 import ForBusinessPage from "@/pages/ForBusinessPage";
 import PricingPage from "@/pages/PricingPage";
+import AdminDashboardPage from "@/pages/AdminDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/locations" component={LocationsPage} />
       <Route path="/for-business" component={ForBusinessPage} />
       <Route path="/pricing" component={PricingPage} />
+      <Route path="/admin" component={AdminDashboardPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -32,7 +34,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "") }>
           <Router />
         </WouterRouter>
         <Toaster />
