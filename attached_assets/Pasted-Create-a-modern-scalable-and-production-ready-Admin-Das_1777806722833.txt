@@ -1,0 +1,150 @@
+Create a modern, scalable, and production-ready **Admin Dashboard** for a Drone Delivery Platform.
+
+### 🎯 Core Objective
+
+Build a full-featured admin panel that allows administrators to manage drone operations, delivery zones, users, and real-time logistics.
+
+---
+
+### 🧩 Tech Stack
+
+* Frontend: React / Next.js (App Router)
+* Backend: Node.js (Express) or Laravel API
+* Database: PostgreSQL
+* Auth: JWT / OAuth with role-based access control (RBAC)
+* Realtime: WebSockets (for drone tracking)
+* Maps: Google Maps API or Mapbox
+
+---
+
+### 🔐 Authentication & Roles
+
+* Admin login (email + password)
+* Roles: Super Admin, Operations Manager, Support Agent
+* Permissions:
+
+  * Manage drones
+  * Manage users
+  * Monitor deliveries
+  * View analytics
+
+---
+
+### 📊 Dashboard (Home)
+
+* KPIs:
+
+  * Total deliveries (today, week, month)
+  * Active drones
+  * Failed deliveries
+  * Revenue
+* Live drone map with real-time movement
+* Recent activities log
+
+---
+
+### 🚁 Drone Management
+
+* Add/Edit/Delete drones
+* Drone attributes:
+
+  * ID, model, battery status, payload capacity
+  * Current location (GPS)
+  * Status (idle, delivering, charging, maintenance)
+* Live telemetry panel
+
+---
+
+### 📦 Order & Delivery Management
+
+* View all delivery orders
+* Filter by:
+
+  * Status (pending, in-transit, delivered, failed)
+  * Location
+  * Time
+* Assign drones to deliveries
+* Real-time delivery tracking
+* Delivery history logs
+
+---
+
+### 🗺️ Delivery Zone Management
+
+* Create and edit delivery zones on map
+* Draw polygons to define zones
+* Set:
+
+  * Pricing per zone
+  * Max delivery distance
+  * Restricted/no-fly zones
+
+---
+
+### 👤 User Management
+
+* View and manage customers
+* Block/unblock users
+* View order history per user
+
+---
+
+### 📈 Analytics & Reports
+
+* Delivery success rate
+* Average delivery time
+* Revenue analytics
+* Export reports (CSV/PDF)
+
+---
+
+### ⚙️ Settings
+
+* Drone operation rules
+* Pricing configurations
+* API integrations (maps, payment gateways)
+
+---
+
+### 🎨 UI/UX Requirements
+
+* Clean, modern UI (like Stripe or Vercel dashboards)
+* Dark/light mode
+* Sidebar navigation
+* Responsive design
+* Data tables with sorting, filtering, pagination
+
+---
+
+### 🔔 Notifications
+
+* Alerts for:
+
+  * Drone failures
+  * Low battery
+  * Delivery issues
+
+---
+
+### 🧠 Advanced Features (Optional but Recommended)
+
+* AI-based route optimization
+* Predictive maintenance alerts
+* Heatmaps for delivery demand
+* Multi-tenant support (for SaaS expansion)
+
+---
+
+### 📦 Output Requirements
+
+* Fully structured folder architecture
+* API routes + frontend pages
+* Dummy seed data
+* Clean, reusable components
+* Scalable code (no hacks)
+
+---
+
+### 💡 Goal
+
+The system should feel like a **real logistics control center**, not just a CRUD dashboard.
