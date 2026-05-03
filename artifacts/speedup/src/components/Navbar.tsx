@@ -62,9 +62,7 @@ export function Navbar() {
                   onMouseLeave={e => { if (!active) e.currentTarget.style.color = "#4B5675"; }}
                 >
                   {link.label}
-                  {active && (
-                    <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full" style={{ background: "#FF5500" }} />
-                  )}
+                  {active && <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full" style={{ background: "#FF5500" }} />}
                 </button>
               );
             })}
