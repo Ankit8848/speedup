@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "pnpm install --no-frozen-lockfile",
+  "installCommand": "pnpm install --no-frozen-lockfile --filter {./artifacts/speedup}... --filter {./artifacts/api-server}...",
   "buildCommand": "pnpm --filter ./artifacts/api-server build && pnpm --filter ./artifacts/speedup build",
   "outputDirectory": "artifacts/speedup/dist/public",
   "functions": {
