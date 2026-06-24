@@ -2,10 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm --filter ./artifacts/speedup build",
+  "buildCommand": "pnpm --filter ./artifacts/api-server build && pnpm --filter ./artifacts/speedup build",
   "outputDirectory": "artifacts/speedup/dist/public",
   "functions": {
-    "api/index.ts": {
+    "api/index.mjs": {
       "memory": 1024,
       "maxDuration": 30
     }
