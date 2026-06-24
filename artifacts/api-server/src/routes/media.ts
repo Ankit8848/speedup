@@ -1,10 +1,8 @@
-import fs from "node:fs/promises";
-import path from "node:path";
 import { Router, type IRouter } from "express";
 import { desc, eq } from "drizzle-orm";
 import { db, mediaAssetsTable } from "@workspace/db";
 import { requireAuth } from "../middlewares/auth";
-import { upload, publicUrlFor, UPLOAD_ROOT } from "../lib/uploads";
+import { upload, saveUpload, deleteUpload } from "../lib/uploads";
 import { HttpError } from "../lib/http-error";
 
 const router: IRouter = Router();
@@ -22,14 +20,16 @@ router.get("/", requireAuth, async (_req, res) => {
 router.post("/", requireAuth, upload.single("file"), async (req, res) => {
   if (!req.file) throw HttpError.badRequest("No file uploaded (or type not allowed)");
 
+  const stored = await saveUpload(req.file);
+
   const [asset] = await db
     .insert(mediaAssetsTable)
     .values({
-      filename: req.file.filename,
+      filename: stored.filename,
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,
       sizeBytes: req.file.size,
-      url: publicUrlFor(req.file.filename),
+      url: stored.url,
       uploadedBy: req.user!.sub,
     })
     .returning();
@@ -49,7 +49,9 @@ router.delete("/:id", requireAuth, async (req, res) => {
   if (!asset) throw HttpError.notFound("Media not found");
 
   await db.delete(mediaAssetsTable).where(eq(mediaAssetsTable.id, id));
-  await fs.rm(path.join(UPLOAD_ROOT, asset.filename), { force: true });
+  await deleteUpload(asset.url, asset.filename).catch(() => {
+    /* file already gone — DB record removal is what matters */
+  });
 
   res.json({ ok: true });
 });
