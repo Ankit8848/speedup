@@ -1,20 +1,12 @@
 import { motion } from "framer-motion";
+import { useSection } from "@/content/ContentProvider";
 
-const NEWS_ITEMS = [
-  { emoji: "🚀", text: "SpeedUp launches drone delivery in Orlando, FL", color: "#FF5500", bg: "rgba(255,85,0,0.08)" },
-  { emoji: "📦", text: "100,000th delivery milestone reached", color: "#D97706", bg: "rgba(217,119,6,0.08)" },
-  { emoji: "✈️", text: "FAA grants BVLOS certification for 12 new cities", color: "#2563EB", bg: "rgba(37,99,235,0.08)" },
-  { emoji: "🌿", text: "Fleet runs 100% on renewable energy", color: "#16A34A", bg: "rgba(22,163,74,0.08)" },
-  { emoji: "🏆", text: "Best Drone Delivery Startup 2025 — TechCrunch", color: "#9333EA", bg: "rgba(147,51,234,0.08)" },
-  { emoji: "📍", text: "New hub opening in Dallas, TX · Q3 2025", color: "#0891B2", bg: "rgba(8,145,178,0.08)" },
-  { emoji: "💊", text: "CVS partnership: same-day pharmacy deliveries", color: "#059669", bg: "rgba(5,150,105,0.08)" },
-  { emoji: "⚡", text: "$120M Series C raised to expand nationwide", color: "#D97706", bg: "rgba(217,119,6,0.08)" },
-  { emoji: "🇺🇸", text: "Expanding to 25 US cities by end of 2025", color: "#2563EB", bg: "rgba(37,99,235,0.08)" },
-];
-
-const DOUBLED = [...NEWS_ITEMS, ...NEWS_ITEMS];
+interface TickerItem { emoji: string; text: string; color: string }
 
 export function NewsTicker() {
+  const { items } = useSection<{ items: TickerItem[] }>("global.ticker");
+  const DOUBLED = [...items, ...items];
+
   return (
     <div
       className="fixed top-0 left-0 right-0 z-[101] h-10 overflow-hidden flex items-center"
@@ -55,7 +47,7 @@ export function NewsTicker() {
             <div key={i} className="flex items-center gap-5 shrink-0">
               <div
                 className="flex items-center gap-2 px-3 py-0.5 rounded-full shrink-0"
-                style={{ background: item.bg, border: `1px solid ${item.color}20` }}
+                style={{ background: `${item.color}14`, border: `1px solid ${item.color}20` }}
               >
                 <span className="text-sm leading-none">{item.emoji}</span>
                 <span className="text-[11px] font-semibold whitespace-nowrap" style={{ color: item.color }}>

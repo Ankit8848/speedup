@@ -7,68 +7,23 @@ import { NewsTicker } from "@/components/NewsTicker";
 import { HeroSection } from "@/components/HeroSection";
 import { StatsSection } from "@/components/StatsSection";
 import { FinalCTA } from "@/components/FinalCTA";
-import { CustomCursor } from "@/components/CustomCursor";
 import { Footer } from "@/components/Footer";
+import { useSection } from "@/content/ContentProvider";
 
-const PAGE_CARDS = [
-  {
-    label: "How It Works",
-    headline: "Order to door.\nThree steps.",
-    desc: "See exactly how a delivery goes from tap to backyard in under 10 minutes.",
-    href: "/how-it-works",
-    accent: "#FF5500",
-    bg: "#FFF5F0",
-    border: "rgba(255,85,0,0.15)",
-    num: "01",
-  },
-  {
-    label: "Technology",
-    headline: "Built for\nthe future.",
-    desc: "AI navigation, solid-state LiDAR, dual 5G+satellite comms — explore the hardware.",
-    href: "/technology",
-    accent: "#2563EB",
-    bg: "#EFF6FF",
-    border: "rgba(37,99,235,0.15)",
-    num: "02",
-  },
-  {
-    label: "Safety",
-    headline: "Zero\nincidents.",
-    desc: "FAA Part 135 certified. 4M+ hours flown. Every safety layer, explained.",
-    href: "/safety",
-    accent: "#16A34A",
-    bg: "#F0FDF4",
-    border: "rgba(22,163,74,0.15)",
-    num: "03",
-  },
-  {
-    label: "Locations",
-    headline: "Live in\n6 cities.",
-    desc: "Explore active zones, watch a live drone flight, and check your address.",
-    href: "/locations",
-    accent: "#7C3AED",
-    bg: "#F5F3FF",
-    border: "rgba(124,58,237,0.15)",
-    num: "04",
-  },
-  {
-    label: "For Business",
-    headline: "Cut delivery\ncosts in half.",
-    desc: "No driver fleet, no tips — a flat fee per delivery. See plans for every industry.",
-    href: "/for-business",
-    accent: "#D97706",
-    bg: "#FFFBEB",
-    border: "rgba(217,119,6,0.15)",
-    num: "05",
-  },
-];
+interface PageCard { label: string; headline: string; desc: string; href: string; accent: string; num: string }
+interface PageCardsContent { eyebrow: string; heading: string; subhead: string; cards: PageCard[] }
 
 export default function Home() {
   const [, navigate] = useLocation();
+  const pageCards = useSection<PageCardsContent>("home.pageCards");
+  const PAGE_CARDS = pageCards.cards.map((card) => ({
+    ...card,
+    bg: `${card.accent}0f`,
+    border: `${card.accent}26`,
+  }));
 
   return (
     <div style={{ background: "#FFFFFF" }}>
-      <CustomCursor />
       <NewsTicker />
       <Navbar />
       <main style={{ paddingTop: "40px" }}>
@@ -81,13 +36,13 @@ export default function Home() {
             <div className="flex items-center gap-3 mb-6">
               <span className="w-8 h-px" style={{ background: "#FF5500" }} />
               <span className="text-[10px] font-bold tracking-[0.25em] uppercase" style={{ color: "#FF5500" }}>
-                Explore SpeedUp
+                {pageCards.eyebrow}
               </span>
             </div>
 
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-14">
               <h2
-                className="font-black uppercase leading-[0.9]"
+                className="font-black uppercase leading-[0.9] whitespace-pre-line"
                 style={{
                   fontSize: "clamp(2.5rem, 6vw, 5.5rem)",
                   letterSpacing: "-0.035em",
@@ -95,10 +50,10 @@ export default function Home() {
                   color: "#0A0F1E",
                 }}
               >
-                Everything<br />you need<br />to know.
+                {pageCards.heading}
               </h2>
               <p className="text-lg leading-relaxed max-w-sm lg:text-right" style={{ color: "#6B7280" }}>
-                Dive into any section — each page is packed with details, demos, and data.
+                {pageCards.subhead}
               </p>
             </div>
 

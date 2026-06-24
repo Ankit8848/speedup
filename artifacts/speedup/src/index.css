@@ -59,9 +59,12 @@
     @apply font-sans antialiased overflow-x-hidden;
     background: #ffffff;
     color: #0A0F1E;
-    cursor: none;
   }
   h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; }
+  /* Modern pointer feedback on interactive elements. */
+  button:not(:disabled), a, [role="button"], summary, label[for] {
+    cursor: pointer;
+  }
 }
 
 @layer utilities {

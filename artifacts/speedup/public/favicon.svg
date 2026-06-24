@@ -1,3 +1,19 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+<svg width="180" height="180" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fav-grad" x1="4" y1="2" x2="36" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF8A3D"/>
+      <stop offset="0.55" stop-color="#FF5500"/>
+      <stop offset="1" stop-color="#E03E00"/>
+    </linearGradient>
+    <linearGradient id="fav-sheen" x1="20" y1="0" x2="20" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="40" height="40" rx="10.5" fill="url(#fav-grad)"/>
+  <rect width="40" height="40" rx="10.5" fill="url(#fav-sheen)"/>
+
+  <path d="M11 23 L20 13.5 L29 23" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M11 29 L20 19.5 L29 29" fill="none" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

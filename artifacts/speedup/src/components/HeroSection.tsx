@@ -2,6 +2,23 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
+import { useSection } from "@/content/ContentProvider";
+import { useDemo } from "./DemoModal";
+
+interface HeroContent {
+  badge: string;
+  headlineLine1: string;
+  headlineHighlight: string;
+  headlineLine3: string;
+  subhead: string;
+  ctaPrimaryLabel: string;
+  ctaPrimaryHref: string;
+  ctaSecondaryLabel: string;
+  ctaSecondaryHref: string;
+  trustStats: { val: string; suf: string; label: string }[];
+  cruiseChip: string;
+  bottomChips: { text: string }[];
+}
 
 /* ─── Bezier math ─────────────────────────── */
 function bez(t: number, p0: [number, number], p1: [number, number], p2: [number, number]): [number, number] {
@@ -130,6 +147,8 @@ function FlightTracker() {
 /* ─── Section ─────────────────────────────── */
 export function HeroSection() {
   const [, navigate] = useLocation();
+  const { open: openDemo } = useDemo();
+  const c = useSection<HeroContent>("home.hero");
 
   return (
     <section id="hero" className="relative w-full overflow-hidden" style={{ minHeight: "100dvh", background: "#FFFFFF" }}>
@@ -174,7 +193,7 @@ export function HeroSection() {
                 style={{ background: "rgba(255,85,0,0.09)", border: "1px solid rgba(255,85,0,0.22)" }}>
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#FF5500" }}/>
                 <span style={{ color: "#FF5500", fontSize: 10, fontWeight: 800, letterSpacing: "0.22em", textTransform: "uppercase" }}>
-                  Now Operational · 6 US Cities
+                  {c.badge}
                 </span>
               </div>
             </motion.div>
@@ -190,9 +209,9 @@ export function HeroSection() {
                 marginBottom: "1.75rem",
               }}
             >
-              Backyard<br/>
-              <span style={{ color: "#FF5500", display: "inline-block" }}>Delivery.</span><br/>
-              Reinvented.
+              {c.headlineLine1}<br/>
+              <span style={{ color: "#FF5500", display: "inline-block" }}>{c.headlineHighlight}</span><br/>
+              {c.headlineLine3}
             </motion.h1>
 
             {/* Subhead */}
@@ -201,8 +220,7 @@ export function HeroSection() {
               transition={{ delay: 0.4, duration: 0.7 }}
               style={{ color: "#6B7280", fontSize: "1.125rem", lineHeight: 1.7, maxWidth: "34rem", marginBottom: "2.5rem" }}
             >
-              Fully autonomous drones deliver from your favorite restaurants and stores to your exact backyard —
-              under 10 minutes, zero traffic, every time.
+              {c.subhead}
             </motion.p>
 
             {/* CTAs */}
@@ -212,7 +230,7 @@ export function HeroSection() {
               className="flex flex-wrap gap-3"
             >
               <button
-                onClick={() => navigate("/for-business")}
+                onClick={openDemo}
                 className="inline-flex items-center gap-2 text-white font-black uppercase transition-all hover:scale-[1.03] active:scale-[0.98]"
                 style={{
                   padding: "1rem 2.25rem", borderRadius: 100, border: "none", cursor: "pointer",
@@ -221,17 +239,17 @@ export function HeroSection() {
                   boxShadow: "0 8px 32px rgba(255,85,0,0.38), 0 2px 8px rgba(255,85,0,0.20)",
                 }}
               >
-                Get Early Access <ArrowRight size={15}/>
+                {c.ctaPrimaryLabel} <ArrowRight size={15}/>
               </button>
               <button
-                onClick={() => navigate("/how-it-works")}
+                onClick={() => navigate(c.ctaSecondaryHref)}
                 className="inline-flex items-center gap-2 font-bold uppercase transition-all hover:border-black/30 hover:text-[#0A0F1E]"
                 style={{
                   padding: "1rem 2.25rem", borderRadius: 100, border: "1.5px solid rgba(0,0,0,0.14)", cursor: "pointer",
                   fontSize: "0.78rem", letterSpacing: "0.12em", color: "#4B5675", background: "transparent",
                 }}
               >
-                How It Works
+                {c.ctaSecondaryLabel}
               </button>
             </motion.div>
 
@@ -241,12 +259,7 @@ export function HeroSection() {
               className="flex flex-wrap gap-x-10 gap-y-4 mt-12 pt-10"
               style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
             >
-              {[
-                { val: "<10", suf: "min", label: "Avg delivery time" },
-                { val: "100K+", suf: "", label: "Deliveries flown" },
-                { val: "0",    suf: "", label: "Incidents to date" },
-                { val: "FAA",  suf: "", label: "Part 135 certified" },
-              ].map(s => (
+              {c.trustStats.map(s => (
                 <div key={s.label}>
                   <div style={{
                     fontFamily: "'Space Grotesk', sans-serif", fontWeight: 900,
@@ -280,25 +293,21 @@ export function HeroSection() {
               className="self-start ml-8 flex items-center gap-2.5 px-4 py-2.5 rounded-full"
               style={{ background: "white", boxShadow: "0 4px 24px rgba(0,0,0,0.09)", border: "1px solid rgba(0,0,0,0.06)", fontSize: 11, fontWeight: 700, color: "#0A0F1E" }}
             >
-              ⚡ <span>Cruise speed: 120 km/h</span>
+              <span>{c.cruiseChip}</span>
             </motion.div>
 
             <FlightTracker />
 
             {/* Bottom chips */}
             <div className="flex gap-2">
-              {[
-                "🛡 FAA Part 135",
-                "📍 ±10 cm precision",
-                "🔋 100% renewable",
-              ].map(chip => (
+              {c.bottomChips.map(chip => (
                 <motion.div
-                  key={chip}
+                  key={chip.text}
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.15 }}
                   className="px-3.5 py-2 rounded-full text-xs font-bold"
                   style={{ background: "white", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", border: "1px solid rgba(0,0,0,0.06)", color: "#4B5675" }}
                 >
-                  {chip}
+                  {chip.text}
                 </motion.div>
               ))}
             </div>

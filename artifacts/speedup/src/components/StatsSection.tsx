@@ -1,5 +1,9 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { useSection } from "@/content/ContentProvider";
+
+interface StatItem { prefix: string; counter: number; suffix: string; unit: string; label: string; sub: string; color: string }
+interface Partner { name: string; emoji: string }
 
 /* ─── Animated counter ───────────────────── */
 function Counter({ to, duration = 1.6 }: { to: number; duration?: number }) {
@@ -22,26 +26,12 @@ function Counter({ to, duration = 1.6 }: { to: number; duration?: number }) {
   return <span ref={ref}>{val}</span>;
 }
 
-/* ─── Stats data ─────────────────────────── */
-const stats = [
-  { prefix: "<", counter: 10, suffix: "", unit: "min",   label: "Average delivery time", sub: "Door to backyard", color: "#FF5500" },
-  { prefix: "",  counter: 100, suffix: "K+", unit: "",   label: "Deliveries flown",       sub: "And counting daily", color: "#D97706" },
-  { prefix: "",  counter: 99,  suffix: ".9%", unit: "",  label: "Fleet uptime",            sub: "Across all hubs",    color: "#16A34A" },
-  { prefix: "",  counter: 0,   suffix: "",   unit: "",   label: "Incidents recorded",      sub: "Since launch 2022",  color: "#2563EB" },
-];
-
-const partners = [
-  { name: "Chili's",     emoji: "🌶️" },
-  { name: "CVS",         emoji: "💊" },
-  { name: "Walmart",     emoji: "🛒" },
-  { name: "Domino's",    emoji: "🍕" },
-  { name: "Target",      emoji: "🎯" },
-  { name: "Starbucks",   emoji: "☕" },
-  { name: "Whole Foods", emoji: "🥗" },
-  { name: "GNC",         emoji: "💪" },
-];
-
 export function StatsSection() {
+  const statsContent = useSection<{ eyebrow: string; items: StatItem[] }>("home.stats");
+  const partnersContent = useSection<{ label: string; items: Partner[] }>("home.partners");
+  const stats = statsContent.items;
+  const partners = partnersContent.items;
+
   return (
     <section id="stats" className="relative overflow-hidden" style={{ background: "#FFFFFF" }}>
 
@@ -53,7 +43,7 @@ export function StatsSection() {
           <div className="flex items-center gap-3 mb-14">
             <span className="w-8 h-px block" style={{ background: "#FF5500" }}/>
             <span style={{ color: "#FF5500", fontSize: 10, fontWeight: 800, letterSpacing: "0.26em", textTransform: "uppercase" }}>
-              By the numbers
+              {statsContent.eyebrow}
             </span>
           </div>
 
@@ -111,7 +101,7 @@ export function StatsSection() {
         <div className="flex items-center gap-2 mb-5 justify-center">
           <span className="w-6 h-px block" style={{ background: "rgba(0,0,0,0.12)" }}/>
           <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", color: "#9CA3AF" }}>
-            Delivery Partners
+            {partnersContent.label}
           </span>
           <span className="w-6 h-px block" style={{ background: "rgba(0,0,0,0.12)" }}/>
         </div>

@@ -1,45 +1,39 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Building2, Users, Rocket } from "lucide-react";
 import { useLocation } from "wouter";
+import { useSection } from "@/content/ContentProvider";
+import { useDemo } from "./DemoModal";
 
-const cards = [
-  {
-    icon: Building2,
-    tag: "For Businesses",
-    headline: "Cut your delivery costs in half.",
-    desc: "No driver fleet, no tips, no logistics overhead. SpeedUp charges a flat fee per delivery and handles everything from launch to landing.",
-    cta: "Explore Business Plans",
-    href: "/for-business",
-    color: "#FF5500",
-    bg: "#FFF5F0",
-    border: "rgba(255,85,0,0.15)",
-  },
-  {
-    icon: Users,
-    tag: "For Residents",
-    headline: "Your neighborhood, delivered fast.",
-    desc: "Sign up for early access in your city and get notified when SpeedUp goes live within 2 km of your address.",
-    cta: "Join the Waitlist",
-    href: "/locations",
-    color: "#2563EB",
-    bg: "#EFF6FF",
-    border: "rgba(37,99,235,0.15)",
-  },
-  {
-    icon: Rocket,
-    tag: "For Investors",
-    headline: "The future of last-mile logistics.",
-    desc: "We've proven the model. Now we're scaling to 100 cities by 2027. See our traction, unit economics, and roadmap.",
-    cta: "View Investor Deck",
-    href: "/technology",
-    color: "#16A34A",
-    bg: "#F0FDF4",
-    border: "rgba(22,163,74,0.15)",
-  },
-];
+interface CtaCard { tag: string; headline: string; desc: string; cta: string; href: string; color: string }
+interface FinalCtaContent {
+  eyebrow: string;
+  headlineLine1: string;
+  headlineHighlight: string;
+  subhead: string;
+  cards: CtaCard[];
+  demoEyebrow: string;
+  demoHeadline: string;
+  demoPrimaryLabel: string;
+  demoPrimaryHref: string;
+  demoSecondaryLabel: string;
+  demoSecondaryHref: string;
+  liveLabel: string;
+  cities: { name: string }[];
+  comingSoon: string;
+}
+
+const ICONS = [Building2, Users, Rocket];
 
 export function FinalCTA() {
   const [, navigate] = useLocation();
+  const { open: openDemo } = useDemo();
+  const c = useSection<FinalCtaContent>("home.finalCta");
+  const cards = c.cards.map((card, i) => ({
+    ...card,
+    icon: ICONS[i % ICONS.length],
+    bg: `${card.color}0f`,
+    border: `${card.color}26`,
+  }));
 
   return (
     <section className="relative overflow-hidden"
@@ -51,7 +45,7 @@ export function FinalCTA() {
         <div className="flex items-center gap-3 mb-12">
           <span className="w-8 h-px" style={{ background: "#FF5500" }} />
           <span className="text-[10px] font-bold tracking-[0.25em] uppercase" style={{ color: "#FF5500" }}>
-            Available Now · 6 US Cities
+            {c.eyebrow}
           </span>
         </div>
 
@@ -71,13 +65,13 @@ export function FinalCTA() {
               color: "#0A0F1E",
             }}
           >
-            Delivery.<br />
+            {c.headlineLine1}<br />
             <span style={{ color: "#FF5500" }}>
-              Reinvented.
+              {c.headlineHighlight}
             </span>
           </h2>
           <p className="mt-8 text-xl leading-relaxed max-w-2xl" style={{ color: "#6B7280" }}>
-            Join thousands already flying with SpeedUp. Whether you're a restaurant, retailer, or resident — there's a SpeedUp plan built for you.
+            {c.subhead}
           </p>
         </motion.div>
 
@@ -129,31 +123,31 @@ export function FinalCTA() {
 
           <div className="relative z-10">
             <div className="text-[10px] font-bold tracking-[0.25em] uppercase mb-3 text-white/70">
-              Request a Demo
+              {c.demoEyebrow}
             </div>
-            <h3 className="font-black uppercase text-white text-3xl md:text-4xl leading-none"
+            <h3 className="font-black uppercase text-white text-3xl md:text-4xl leading-none whitespace-pre-line"
               style={{ fontFamily: "'Space Grotesk', sans-serif", letterSpacing: "-0.02em" }}>
-              See SpeedUp fly<br />in your city.
+              {c.demoHeadline}
             </h3>
           </div>
 
           <div className="relative z-10 flex flex-col sm:flex-row gap-3 shrink-0">
             <button
               type="button"
-              onClick={() => navigate("/for-business")}
+              onClick={openDemo}
               className="flex items-center gap-2 font-bold uppercase tracking-[0.1em] rounded-full transition-all hover:opacity-90 hover:scale-[1.02]"
               style={{ padding: "1rem 2rem", fontSize: "0.8rem", background: "white", color: "#FF5500", boxShadow: "0 8px 32px rgba(0,0,0,0.15)" }}>
-              Schedule a Demo <ArrowRight className="w-4 h-4" />
+              {c.demoPrimaryLabel} <ArrowRight className="w-4 h-4" />
             </button>
             <button
               type="button"
-              onClick={() => navigate("/pricing")}
+              onClick={() => navigate(c.demoSecondaryHref)}
               className="flex items-center gap-2 font-bold uppercase tracking-[0.1em] rounded-full transition-all"
               style={{ padding: "1rem 2rem", fontSize: "0.8rem", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.35)" }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.65)"}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.35)"}
             >
-              View Pricing
+              {c.demoSecondaryLabel}
             </button>
           </div>
         </motion.div>
@@ -166,12 +160,12 @@ export function FinalCTA() {
           className="mt-16 pt-10 flex flex-wrap items-center gap-x-8 gap-y-3"
           style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
         >
-          <span className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: "#C4CBD8" }}>Live in</span>
-          {["Orlando, FL", "Miami, FL", "Dallas, TX", "Atlanta, GA", "New York, NY"].map(city => (
-            <span key={city} className="text-sm font-semibold" style={{ color: "#6B7280" }}>{city}</span>
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: "#C4CBD8" }}>{c.liveLabel}</span>
+          {c.cities.map(city => (
+            <span key={city.name} className="text-sm font-semibold" style={{ color: "#6B7280" }}>{city.name}</span>
           ))}
           <span className="ml-auto text-sm font-semibold" style={{ color: "#FF5500" }}>
-            + Los Angeles → Q3 2025
+            {c.comingSoon}
           </span>
         </motion.div>
       </div>

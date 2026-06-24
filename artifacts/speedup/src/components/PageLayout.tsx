@@ -1,7 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { Navbar } from "./Navbar";
 import { NewsTicker } from "./NewsTicker";
-import { CustomCursor } from "./CustomCursor";
 import { Footer } from "./Footer";
 
 interface PageLayoutProps {
@@ -15,7 +14,6 @@ export function PageLayout({ children }: PageLayoutProps) {
 
   return (
     <div style={{ background: "#FFFFFF" }}>
-      <CustomCursor />
       <NewsTicker />
       <Navbar />
       <main style={{ paddingTop: "108px" }}>

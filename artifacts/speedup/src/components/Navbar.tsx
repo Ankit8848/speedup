@@ -3,18 +3,25 @@ import { X, Menu, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { SpeedUpLogo } from "./SpeedUpLogo";
+import { useSection } from "@/content/ContentProvider";
+import { useDemo } from "./DemoModal";
 
-const NAV_LINKS = [
-  { label: "How It Works", href: "/how-it-works" },
-  { label: "Technology", href: "/technology" },
-  { label: "Safety", href: "/safety" },
-  { label: "Locations", href: "/locations" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "For Business", href: "/for-business" },
-  { label: "Admin", href: "/admin" },
-];
+interface NavbarContent {
+  links: { label: string; href: string }[];
+  ctaSecondaryLabel: string;
+  ctaSecondaryHref: string;
+  ctaPrimaryLabel: string;
+  ctaPrimaryHref: string;
+}
 
 export function Navbar() {
+  const {
+    links: NAV_LINKS,
+    ctaSecondaryLabel,
+    ctaSecondaryHref,
+    ctaPrimaryLabel,
+  } = useSection<NavbarContent>("global.navbar");
+  const { open: openDemo } = useDemo();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [location, navigate] = useLocation();
@@ -69,11 +76,11 @@ export function Navbar() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
-            <button onClick={() => go("/locations")} className="px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] rounded-full transition-all hover:bg-black/5" style={{ color: "#4B5675", border: "1px solid rgba(0,0,0,0.15)" }}>
-              Find My City
+            <button onClick={() => go(ctaSecondaryHref)} className="px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] rounded-full transition-all hover:bg-black/5" style={{ color: "#4B5675", border: "1px solid rgba(0,0,0,0.15)" }}>
+              {ctaSecondaryLabel}
             </button>
-            <button onClick={() => go("/for-business")} className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] rounded-full text-white transition-all hover:opacity-90 hover:scale-[1.02]" style={{ background: "#FF5500", boxShadow: "0 4px 16px rgba(255,85,0,0.3)" }}>
-              Request Demo <ArrowRight className="w-3 h-3" />
+            <button onClick={openDemo} className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] rounded-full text-white transition-all hover:opacity-90 hover:scale-[1.02]" style={{ background: "#FF5500", boxShadow: "0 4px 16px rgba(255,85,0,0.3)" }}>
+              {ctaPrimaryLabel} <ArrowRight className="w-3 h-3" />
             </button>
           </div>
 
@@ -100,8 +107,8 @@ export function Navbar() {
                 ))}
               </nav>
               <div className="px-8 pb-10 pt-6 flex flex-col gap-3">
-                <button onClick={() => go("/locations")} className="w-full py-4 text-sm font-bold uppercase tracking-widest text-white border-2 border-white/40 rounded-full hover:bg-white/10 transition-colors">Find My City</button>
-                <button onClick={() => go("/for-business")} className="w-full py-4 text-sm font-bold uppercase tracking-widest rounded-full bg-white hover:opacity-90 transition-opacity" style={{ color: "#FF5500" }}>Request Demo</button>
+                <button onClick={() => go(ctaSecondaryHref)} className="w-full py-4 text-sm font-bold uppercase tracking-widest text-white border-2 border-white/40 rounded-full hover:bg-white/10 transition-colors">{ctaSecondaryLabel}</button>
+                <button onClick={() => { setMenuOpen(false); openDemo(); }} className="w-full py-4 text-sm font-bold uppercase tracking-widest rounded-full bg-white hover:opacity-90 transition-opacity" style={{ color: "#FF5500" }}>{ctaPrimaryLabel}</button>
               </div>
             </motion.div>
           </>
